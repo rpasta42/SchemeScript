@@ -5,13 +5,18 @@
 #When called with gen flag, starts a REPL which
 #generates JavaScript and prints it to stdout
 
-#If called without any options, then it runs itself
+#If called without gen flag, then it runs itself
 #with gen flag and pipes output to a javascript REPL.
+
+#If called with ui flag, then starts GUI repl.
 
 if [[ $@ == **gen** ]]
 then
    ###REPL HELPER
-   printf "var scm = require('./ssstd.js');\n"
+   if [[ $@ != **ui** ]]
+   then
+      printf "var scm = require('./ssstd.js');"
+   fi
 
    while true; do
       guile ir.scm 2>/tmp/bad_guile.log
@@ -19,10 +24,14 @@ then
    ###END REPL HELPER
 fi
 
-#printf "var scm = require('./js_std.js');"
+extra=""
 
-#jsengine=phantomjs
+jsengine=phantomjs
 #jsengine="node -i"
-jsengine=./ui/run.py
+if [[ $@ == *ui* ]]
+then
+   jsengine=./ui/run.py
+   extra=ui
+fi
 
-$0 gen | $jsengine
+$0 gen $extra | $jsengine

@@ -27,7 +27,7 @@ def on_update(w):
 
 
 def main():
-   w = setupElectron('index.html', on_js_event)
+   w = setupElectron('ui/index.html', on_js_event)
    w.run(on_update, 300)
 
 main()

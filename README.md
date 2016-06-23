@@ -26,14 +26,18 @@ Features:
 - [x] Addition and subtraction
 
 High priority TODO's:
+- [ ] better REPL for UI
 - [ ] if and cond statements
 - [ ] efficient recursion or iteration mechanism
-- [ ] ways to create and access javascript objects
+- [ ] ways to create and access javascript objects (maybe use . or # or $ etc)
 - [ ] create example games
    - [ ] Write a graphical Risk game
+- [ ] break up ir.scm into different parts
 - [ ] tool for compiling files instead of just having REPL
 
 Other unsupported things and TODO's:
+- [ ] error checking on ssstd.js
+- [ ] possibly rename to ssstd.js to stdss.js
 - [ ] expose read to SchemeScript (i.e. re-write Sexps parser in JavaScript)
 - [ ] expose eval to SchemeScript (i.e. re-write SchemeScript in SchemeScript)
 - [ ] Test out on LambdaOxide

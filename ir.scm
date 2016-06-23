@@ -262,6 +262,7 @@
    (cond ((string=? name "+") "scm.sum")
          ((string=? name "-") "scm.diff")
          ((string=? name "*") "scm.mul")
+         ((string=? name ".") "scm.obj_dict")
          (else name)))
 
 (define (gen-js-if data nest) "if a else b")
@@ -288,13 +289,15 @@
    ;(display data)
    ;(display (cadr data))
    (define semi "") ;";"
-   (string-append
-      (lookup-func (ir->js (car data) nest)) "("
-      ;(lst->comma-str (map (lambda (x) (cadr x)) (cadr data)))
-      ;(lst->comma-str (map (lambda (x) (ir->js (cadr x) nest)) (cadr data)))
-      (lst->comma-str (map (lambda (x) (ir->js x nest)) (cadr data)))
-      ;(lst->comma-str (map (lambda (x) (car (ir->js x nest))) (cadr data)))
-      ")" semi))
+   (let ((method (lookup-func (ir->js (car data) nest))))
+      (if (string=? method ".")
+         (string-append
+            method "("
+            ;(lst->comma-str (map (lambda (x) (cadr x)) (cadr data)))
+            ;(lst->comma-str (map (lambda (x) (ir->js (cadr x) nest)) (cadr data)))
+            (lst->comma-str (map (lambda (x) (ir->js x nest)) (cadr data)))
+            ;(lst->comma-str (map (lambda (x) (car (ir->js x nest))) (cadr data)))
+            ")" semi))
 
 (define (gen-js-assign data nest)
    ;(display (cadadr data))
