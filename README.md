@@ -39,6 +39,7 @@ High priority TODO's:
    - [ ] Write a graphical Risk game
 - [ ] break up ir.scm into different parts
 - [ ] tool for compiling files instead of just having REPL
+- [ ] make if support full range of Scheme expressions
 
 Other unsupported things and TODO's:
 - [ ] error checking on ssstd.js

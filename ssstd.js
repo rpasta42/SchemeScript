@@ -20,6 +20,14 @@ function scm_diff() {
    return diff;
 }
 
+function scm_gt(a, b) {
+   return a > b;
+}
+function scm_lt(a, b) {
+   return a < b;
+}
+
+
 //first is object, second method, rest are arguments
 function scm_obj_dict() {
    var args = Array.prototype.slice.call(arguments);
@@ -78,9 +86,17 @@ function phantom_screenshot(url, filename) {
 if (typeof module !== 'undefined' && module.exports) {
    exports.sum = scm_sum;
    exports.diff = scm_diff;
+   exports.gt = scm_gt;
+   exports.lt = scm_lt;
    exports.obj_dict = scm_obj_dict;
    exports.screenshot = phantom_screenshot;
 } else {
-   scm = {'sum': scm_sum, 'diff': scm_diff, 'obj_dict': scm_obj_dict};
+   scm = {
+      'sum': scm_sum,
+      'diff': scm_diff,
+      'gt': scm_gt,
+      'lt': scm_lt,
+      'obj_dict': scm_obj_dict
+   };
 }
 

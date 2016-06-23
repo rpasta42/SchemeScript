@@ -20,3 +20,5 @@
 (alert (\ test_obj type))
 (\ test_obj test call)
 (\ test_obj test2 "yo")
+
+(alert (if (> 3 5) 2 1))

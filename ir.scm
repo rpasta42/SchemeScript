@@ -263,9 +263,18 @@
          ((string=? name "-") "scm.diff")
          ((string=? name "*") "scm.mul")
          ((string=? name "\\") "scm.obj_dict")
+         ((string=? name ">") "scm.gt")
+         ((string=? name "<") "scm.lt")
          (else name)))
 
-(define (gen-js-if data nest) "if a else b")
+(define (gen-js-if data nest)
+   (string-append
+      "(function() {"
+      ;"var pred = (function(){" (ir->js (car data))
+      "var __ss__pred = " (ir->js (car data) nest) ";"
+      "if (__ss__pred) return " (ir->js (cadr data) nest) ";"
+      "return " (ir->js (caddr data) nest) ";"
+      "})()"))
 
 (define (gen-js-lambda data nest)
    ;"function () { /*lambda*/ }\n"
