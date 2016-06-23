@@ -326,7 +326,10 @@
    ;(display (ir->js (cadr data) nest))
    ;(display "-----------------------")
    ;(define newl "") ;(define newl "\n")
-   (string-append "var " (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
+
+   ;THIS BREAKS MY RETURN BULLSHIT (but mostly works):
+   ;(string-append "var " (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
+   (string-append (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
 
 (load "scm_lib.scm")
 (define (emit-js-init)
