@@ -2,11 +2,11 @@
 
 function scm_sum() {
    var args = scm_sum.arguments;
-   var sum = 0;
+   var ret = 0;
    for (var arg in args) {
-      sum += args[arg];
+      ret += args[arg];
    }
-   return sum;
+   return ret;
 }
 
 function scm_diff() {
@@ -31,4 +31,4 @@ function phantom_screenshot(url, filename) {
 
 exports.sum = scm_sum;
 exports.diff = scm_diff;
-exports.screenshot = screenshot;
+exports.screenshot = phantom_screenshot;

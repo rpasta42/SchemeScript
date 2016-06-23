@@ -308,7 +308,7 @@
 (load "scm_lib.scm")
 (define (emit-js-init)
    ;(read-f "js_std.js"))
-   "var scm = require('./js_std.js');")
+   "var scm = require('./ssstd.js');")
 
 (define (ir->js ir nest)
    (let ((data (get-data ir)))

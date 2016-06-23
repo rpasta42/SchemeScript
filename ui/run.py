@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import sys, time, gui
+import sys, time, pwkg
 
 def setupElectron(index_path, on_event):
-   w = gui.Window(100, 100, "Scheme JS", debug=True)
-   w.load('index.html')
+   w = pwkg.Window(100, 100, "Scheme JS", debug=True)
+   w.load(index_path)
    w.on_gui_event += on_event
-   #w.run(update, 1000)
-   return w #.run()
+   return w
 
 def sleep(x):
    time.sleep(x)
@@ -15,7 +14,6 @@ def sleep(x):
 def on_js_event(msg):
    print(msg)
    print(msg['testdict'])
-   #adblib.click(msg['x']/prop, msg['y']/prop)
 
 def on_update(w):
    #from multiprocessing import Process
@@ -31,5 +29,6 @@ def on_update(w):
 def main():
    w = setupElectron('index.html', on_js_event)
    w.run(on_update, 300)
+
 main()
 
