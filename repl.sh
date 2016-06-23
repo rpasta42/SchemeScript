@@ -1,9 +1,17 @@
 #!/bin/bash
 
+#SchemeScript repl
+
+#When called with gen flag, starts a REPL which
+#generates JavaScript
+
+#If called without any options, then it runs itself
+#with gen flag and pipes output to a javascript REPL.
+
 if [[ $@ == **gen** ]]
 then
    ###REPL HELPER
-   echo "var scm = require('./js_std');"
+   echo "var scm = require('./sstd.js');"
 
    while true; do
       guile ir.scm 2>/tmp/bad_guile.log
@@ -13,9 +21,8 @@ fi
 
 #printf "var scm = require('./js_std.js');"
 
-evu=phantomjs
-#evu="node -i"
-#evu=./scheme-electron/run.py
-#(scm.screenshot "http://github.com" "test.png")
+jsengine=phantomjs
+#jsengine="node -i"
+#jsengine=./ui/run.py
 
-$0 gen | $evu
+$0 gen | $jsengine

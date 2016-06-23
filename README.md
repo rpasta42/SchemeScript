@@ -15,7 +15,7 @@ Scheme REPL works by piping output of ir.scm to a V8 Javascript repl. I'm in the
 
 I'm also planning on implementing SchemeScript library for creating UI's and manipulating DOM.
 
-ui/repl.sh is a basic SchemeScript repl which can call JQuery to modify DOM of a WebKit window (some examples can be found in COOL.notes).
+ui/repl.sh is a basic SchemeScript repl which can call JQuery to modify DOM of a WebKit window (some examples can be found in misc/COOL.notes).
 
 UI REPL works by piping output of ir.scm to a [Python script](https://github.com/KostyaKow/pwkg) which sets up WebkitGTK window and executes Javascript received from stdin.
 
@@ -29,7 +29,8 @@ High priority TODO's:
 - [ ] if and cond statements
 - [ ] efficient recursion or iteration mechanism
 - [ ] ways to create and access javascript objects
-- [ ] create example game
+- [ ] create example games
+   - [ ] Write a graphical Risk game
 - [ ] tool for compiling files instead of just having REPL
 
 Other unsupported things and TODO's:

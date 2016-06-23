@@ -1,3 +1,5 @@
+//SCHEME SCRIPT STANDARD LIBRARY
+
 function scm_sum() {
    var args = scm_sum.arguments;
    var sum = 0;
@@ -18,7 +20,8 @@ function scm_diff() {
    return diff;
 }
 
-function screenshot(url, filename) {
+//broken, see this: https://github.com/ariya/phantomjs/issues/10518
+function phantom_screenshot(url, filename) {
    var page = require('webpage').create();
    page.open(url, function() {
      page.render(filename);

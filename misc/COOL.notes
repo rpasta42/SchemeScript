@@ -3,3 +3,6 @@
 
 (define (setBodyText t) (setText ($ "body") t))
 (setBodyText "nahnahnah")
+
+#phantomJS is broken so this doesn't work
+(scm.screenshot "http://github.com" "test.png")
