@@ -22,13 +22,48 @@ function scm_diff() {
 
 //first is object, second method, rest are arguments
 function scm_obj_dict() {
-   var args = scm_obj_dict.arguments;
+   var args = Array.prototype.slice.call(arguments);
+   //alert(args);
+   //var args = scm_obj_dict.arguments;
 
    var obj = args[0];
    var member = args[1];
 
-   if (args == 2)
+   if (args.length == 2) {
+      //alert('getting dict member');
       return obj[member];
+   }
+   else if (args.length > 2) {
+      //alert('prolly calling');
+      //return obj[member];
+      if (args[2] == "__ss_call__") {
+         //alert('call no arguments');
+
+         //var args = args.slice(3);
+         //return obj[member].apply(this, args);
+         //return obj[member].call(); //obj[member].apply(this, null);
+
+         //return obj[member](); //!!!! this works too!!!
+         return obj[member].apply(obj, null);
+
+      }
+      //alert('call with arguments');
+      //return obj[member].apply(this, args.slice(2, args.length));
+      return obj[member].apply(obj, args.slice(2, args.length));
+
+   } else { /* TODO */ }
+}
+
+//(alert (\ dict_tester ha))
+var dict_tester = {
+   'ha' : 3,
+   'blah' : [1, 2, 3],
+}
+
+var test_obj = {
+   type: 'blah',
+   test : function() { alert('ha'); alert(this.type); },
+   test2 : function(a) { alert(a + this.type); }
 }
 
 //broken, see this: https://github.com/ariya/phantomjs/issues/10518

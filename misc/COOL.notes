@@ -1,4 +1,3 @@
-(alert ($ "body"))
 (alert (JSON.stringify ($ "body"))) ;JSON.stringify cannot serialize cyclic structures.
 
 (define (setBodyText t) (setText ($ "body") t))
@@ -6,3 +5,18 @@
 
 #phantomJS is broken so this doesn't work
 (scm.screenshot "http://github.com" "test.png")
+
+(alert (\ dict_tester ha))
+
+;(alert ($ "body"))
+;(alert (\ ($ "body") html null))
+;got from scheme: alert(scm.obj_dict($("body"), "html", null))
+
+;(alert ((\ ($ "body") html)))
+;got from scheme: alert(scm.obj_dict($("body"), "html")())
+
+(alert (\ ($ "body") html call))
+
+(alert (\ test_obj type))
+(\ test_obj test call)
+(\ test_obj test2 "yo")

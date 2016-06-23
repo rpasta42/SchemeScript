@@ -30,6 +30,11 @@ High priority TODO's:
 - [ ] if and cond statements
 - [ ] efficient recursion or iteration mechanism
 - [ ] ways to create and access javascript objects (maybe use . or # or $ etc)
+   - [ ] possibly rework \ to be first argument of functions. if it is, then assume we aren't calling normal function and do everything properly
+   - [ ] js arrays
+   - [ ] setting dictionary members
+      - [ ] check gen-js-call and add stuff that's missing to argmapper
+      - [ ] check scm_obj_dict and add support for setting members
 - [ ] create example games
    - [ ] Write a graphical Risk game
 - [ ] break up ir.scm into different parts

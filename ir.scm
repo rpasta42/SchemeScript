@@ -262,7 +262,7 @@
    (cond ((string=? name "+") "scm.sum")
          ((string=? name "-") "scm.diff")
          ((string=? name "*") "scm.mul")
-         ((string=? name ".") "scm.obj_dict")
+         ((string=? name "\\") "scm.obj_dict")
          (else name)))
 
 (define (gen-js-if data nest) "if a else b")
@@ -288,16 +288,27 @@
 (define (gen-js-call data nest)
    ;(display data)
    ;(display (cadr data))
+   (define map-i 0)
    (define semi "") ;";"
-   (let ((method (lookup-func (ir->js (car data) nest))))
-      (if (string=? method ".")
-         (string-append
-            method "("
-            ;(lst->comma-str (map (lambda (x) (cadr x)) (cadr data)))
-            ;(lst->comma-str (map (lambda (x) (ir->js (cadr x) nest)) (cadr data)))
-            (lst->comma-str (map (lambda (x) (ir->js x nest)) (cadr data)))
-            ;(lst->comma-str (map (lambda (x) (car (ir->js x nest))) (cadr data)))
-            ")" semi))
+
+   (let* ((method (lookup-func (ir->js (car data) nest)))
+          (arg-mapper
+             (lambda (x)
+                (set! map-i (+ map-i 1))
+                (cond
+                  ((and (= map-i 2) (string=? method "scm.obj_dict"))
+                   (string-append "\"" (ir->js x nest) "\""))
+                  ((and (= map-i 3) (string=? method "scm.obj_dict") (string=? (ir->js x nest) "call"))
+                    (string-append "\"__ss_call__\""))
+                  (else (ir->js x nest))))))
+      (string-append
+         method "("
+         ;(lst->comma-str (map (lambda (x) (cadr x)) (cadr data)))
+         ;(lst->comma-str (map (lambda (x) (ir->js (cadr x) nest)) (cadr data)))
+         ;(lst->comma-str (map (lambda (x) (car (ir->js x nest))) (cadr data)))
+         ;(lst->comma-str (map (lambda (x) (ir->js x nest)) (cadr data))) ;latest good
+         (lst->comma-str (map arg-mapper (cadr data))) ;latest good
+         ")" semi)))
 
 (define (gen-js-assign data nest)
    ;(display (cadadr data))
