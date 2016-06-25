@@ -27,6 +27,15 @@ function scm_lt(a, b) {
    return a < b;
 }
 
+function scm_new_dict() {
+	return {}
+}
+function scm_new_arr() {
+	return []
+}
+function scm_arr_push(arr, e) {
+	arr.push(e)
+}
 
 //first is object, second method, rest are arguments
 function scm_obj_dict() {

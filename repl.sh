@@ -15,7 +15,7 @@ then
    ###REPL HELPER
    if [[ $@ != **ui** ]]
    then
-      printf "var scm = require('./ssstd.js');"
+      printf "var scm = require('./ssstd.js');\n"
    fi
 
    while true; do
@@ -26,8 +26,8 @@ fi
 
 extra=""
 
-jsengine=phantomjs
-#jsengine="node -i"
+#jsengine=phantomjs
+jsengine="nodejs -i"
 if [[ $@ == *ui* ]]
 then
    jsengine=./ui/run.py

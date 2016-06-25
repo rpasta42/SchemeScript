@@ -27,3 +27,12 @@
 ;as of now, all variables go in global scope because of the way i track my variables
 ;so this example works (but pollutes global namespace):
 (define (f x) (define y 4) y)
+
+returning funcs
+	(define x (lambda () (lambda (y) (+ y 3))))
+	success
+	(x)
+	<lambda>
+	((x) 5)
+	8
+
