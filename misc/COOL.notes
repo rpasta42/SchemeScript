@@ -1,3 +1,6 @@
+(define p (\ (require "webpage") create call)))
+(\ p open "http://forty7.guru/buz/burnz/" (lambda (s) (console.log "status:" s)))
+
 (alert (JSON.stringify ($ "body"))) ;JSON.stringify cannot serialize cyclic structures.
 
 (define (setBodyText t) (setText ($ "body") t))
