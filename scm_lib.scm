@@ -11,7 +11,7 @@
                (loop (read-char input-port)))))))
    ret)
 
-(define (str-to-exp str)
+(define (str->exp str)
    (read (open-input-string str)))
 
 (use-modules (ice-9 rdelim))

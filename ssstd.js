@@ -92,6 +92,26 @@ function phantom_screenshot(url, filename) {
    });
 }
 
+//
+/*
+(define my-pic (img (src "test.png")))
+
+(div
+   (style
+      (border-radius 10)
+      (color red))
+   (id "test")
+   (class "yo")
+   ((a "test") ;last array/element is always content
+    (h1 "yolo")
+    (ref my-pic)) ;ref = reference to different element
+*/
+function scm_el(name, attrs) {
+
+}
+//
+
+
 if (typeof module !== 'undefined' && module.exports) {
    exports.sum = scm_sum;
    exports.diff = scm_diff;

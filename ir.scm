@@ -298,7 +298,7 @@
 
 (define (repl-loop)
    (define (helper)
-      (define exp (str-to-exp (stdin-read)))
+      (define exp (str->exp (stdin-read)))
       (if (eq? exp 'exit)
          '()
          (begin (let ((comp-exp (exp->ir exp)))
@@ -315,9 +315,16 @@
    ;(display (emit-js-init))
    (helper))
 
-(define (run-file) '())
+
+(define (comp-file path)
+   (define data (read-f path))
+   (define exp (str->exp data))
+   (display (emit-js-init))
+   ;(display (map (lambda (x) (ir->js x 0)) exp)))
+   (display (map (lambda (x) (ir->js (exp->ir x) 0)) exp)))
 
 ;(display (ir->js (runner exp-lisp) 0))
 ;(repl-loop)
-(repl-loop)
+(comp-file "misc/test.ss")
+
 
