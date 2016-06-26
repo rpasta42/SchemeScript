@@ -37,6 +37,10 @@ function scm_arr_push(arr, e) {
 	arr.push(e)
 }
 
+/*
+(\ test_obj test call)
+(\ test_obj test set newval)
+
 //first is object, second method, rest are arguments
 function scm_obj_dict() {
    var args = Array.prototype.slice.call(arguments);
@@ -94,7 +98,49 @@ function phantom_screenshot(url, filename) {
 
 //
 /*
-(define my-pic (img (src "test.png")))
+(define my-pic (tag img (src "test.png")))
+
+;TODO: should attr's (style, id, class) be in a list?
+;TODO: should children be in a list or by themselves?
+;TODO: should style be attr or it's own property?
+
+;winner!! good
+(define my-pic (tag img (attr (src "test.png"))))
+
+(attr (src "blah") (test "da")) = (attr src "blah") (attr test "da")
+(style background-color red) (style border-radius 10) = (style (background-color red) (border-radius 10))
+
+(tag (div "ha") (ref mypic)) = (tag div "ha") (ref mypic)
+
+(tag div
+     (attr (color red) (id "yo") (class "hi"))
+     (style (background-color red) (border-radius 10))
+     (tag h1 "hello")
+     (tag a "ha")
+     (ref mypic))
+;end winner
+
+(tag a
+     (style ())
+     (attr ())
+     (tag h1 "blah"))
+
+;bad
+(tag (name div)
+     (style (background-color red))
+     (attr (id "yo") (class "ha"))
+     (children (tag (name "ha"))))
+
+(tag
+   div
+   (attr
+      (style (border-radius 10) (background-color red))
+      (color red)
+      (id "yo")
+      (class "yo"))
+   ((tag a "test")
+    (tag h1 "yolo")
+    (ref my-pic)))
 
 (div
    (style
@@ -102,12 +148,11 @@ function phantom_screenshot(url, filename) {
       (color red))
    (id "test")
    (class "yo")
-   ((a "test") ;last array/element is always content
-    (h1 "yolo")
+   ((tag a "test") ;last array/element is always content
+    (tag h1 "yolo")
     (ref my-pic)) ;ref = reference to different element
 */
 function scm_el(name, attrs) {
-
 }
 //
 
