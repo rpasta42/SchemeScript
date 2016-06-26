@@ -3,6 +3,7 @@
 
 
 guile main.scm; guile main.scm  >ss_ir_test.js; nodejs ss_ir_test.js
+guile main.scm >/tmp/racing.js; nodejs /tmp/racing.js
 
 Experimental Scheme->Javascript REPL and cross compiler written in Scheme.
 

@@ -26,7 +26,7 @@
 (define (ir-if? exp) (eq? (car exp) 'if)) ;check more stuff here
 (define (ir-cond? exp) (eq? (car exp) 'cond)) ;check this stuff
 (define (ir-let? exp) (eq? (car exp) 'let))
-(define (ir-begin? exp) (and (pair? exp) (eq? (car exp) 'begin)))
+(define (ir-begin? exp) (and (pair? exp) (or (eq? (car exp) 'do) (eq? (car exp) 'begin))))
 (define (ir-call? exp)
    (and (pair? exp) (> (length exp) 0)))
 

@@ -7,4 +7,5 @@
 
 ;(comp-file "misc.test/cc")
 ;(comp-file "ir.scm")
-(comp-file "scm_lib.scm")
+;(comp-file "scm_lib.scm")
+(comp-file "/home/kkostya/fun/rust/skomakare/examples/racing.lo")

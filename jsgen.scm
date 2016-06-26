@@ -67,7 +67,9 @@
 
 (define (lookup-func name)
    (cond ((string=? name "+") "scm.sum")
+         ((string=? name "/") "scm.div")
          ((string=? name "-") "scm.diff")
+         ((string=? name "=") "scm.eq")
          ((string=? name "*") "scm.mul")
          ((string=? name "\\") "scm.obj_dict")
          ((string=? name ">") "scm.gt")
@@ -156,7 +158,7 @@
          ((is-type? ir 'call) (gen-js-call data nest))
          ((is-type? ir 'assign) (gen-js-assign data nest))
          ((is-type? ir 'num) (number->string (car data))) ;(number->string data)
-         ((is-type? ir 'sym) (symbol->string (car data)))
+         ((is-type? ir 'sym) (lookup-func (symbol->string (car data)))) ;symbol->stirng (car data)
          ((is-type? ir 'str) (string-append "\"" (car data) "\""))
          ((is-type? ir 'cond) "condTODO")
          ((is-type? ir 'let) "letTODO")
