@@ -40,6 +40,9 @@ function scm_arr_push(arr, e) {
 /*
 (\ test_obj test call)
 (\ test_obj test set newval)
+
+(: (a 1) (b 2)) == (dict (a 1) (b 2)) == { a: 1, b:2 }
+(arr a b c) = [a, b, c]
 */
 //first is object, second method, rest are arguments
 function scm_obj_dict() {
@@ -119,6 +122,14 @@ function phantom_screenshot(url, filename) {
      (tag a "ha")
      (ref mypic))
 ;end winner
+
+
+;more winrar examples
+(define ss (style ...))
+(tag div
+     (ref ss) ;set style from variable
+     (style (text-size 10))) ;add more style manually
+;end winrar
 
 (tag a
      (style ())

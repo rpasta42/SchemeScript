@@ -29,6 +29,9 @@
 (define (ir-begin? exp) (and (pair? exp) (or (eq? (car exp) 'do) (eq? (car exp) 'begin))))
 (define (ir-call? exp)
    (and (pair? exp) (> (length exp) 0)))
+(define (ir-special? exp)
+   (and (ir-call? exp)
+        (or (eq? (car exp) 'tag) (eq? (car exp) 'style) (eq? (car exp) 'attr))))
 
 (define (ir-gen-if exp)
    (list (ir-tag 'if) (exp->ir (cadr exp)) (exp->ir (caddr exp)) (exp->ir (cadddr exp))))
@@ -42,7 +45,8 @@
 (define (ir-gen-lambda args body)
 ;   `(,(ir-tag 'lambda) ,(map exp->ir args) ,(exp->ir body)))
    (list (ir-tag 'lambda) (map exp->ir args) (list (map (lambda (x) (exp->ir x)) body))))
-
+(define (ir-gen-special name exp)
+   (list (ir-tag 'special) (exp->ir name) exp))
 (define (ir-gen-begin exp)
    (list (ir-tag 'block) (map exp->ir exp)))
 
@@ -68,6 +72,7 @@
          ((ir-if? exp) (ir-gen-if exp))
          ((ir-cond? exp) (ir-gen-cond exp))
          ((ir-let? exp) (ir-gen-let exp))
+         ((ir-special? exp) (ir-gen-special (car exp) (cdr exp)))
          ((ir-call? exp) (ir-gen-call (car exp) (cdr exp)))
          (else (ir-gen-err "bad gen-ir-cons cond")))))
 

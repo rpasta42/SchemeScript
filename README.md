@@ -1,6 +1,7 @@
 ## WARNING: THIS PROJECT IS IN VERY EARLY STAGE OF DEVELOPMENT
 # SchemeScript
 
+left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
 
 guile main.scm; guile main.scm  >ss_ir_test.js; nodejs ss_ir_test.js
 guile main.scm >/tmp/racing.js; nodejs /tmp/racing.js
