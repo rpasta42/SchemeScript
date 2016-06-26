@@ -12,7 +12,15 @@
    ret)
 
 (define (str->exp str)
-   (read (open-input-string str)))
+   (define in (open-input-string str))
+   (define (rec in)
+      (define x (read in))
+      (if (not (eof-object? x))
+         (cons x (rec in))
+         '()))
+   (rec in))
+   ;(read in))
+   ;(read (open-input-string str)))
 
 (use-modules (ice-9 rdelim))
 
