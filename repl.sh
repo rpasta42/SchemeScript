@@ -20,7 +20,8 @@ then
 
    while true; do
       #guile ir.scm 2>/tmp/bad_guile.log
-      guile main.scm 2>/tmp/bad_guile.log
+      #guile main.scm 2>/tmp/bad_guile.log
+      guile main.scm --no-auto-compile
    done
    ###END REPL HELPER
 fi

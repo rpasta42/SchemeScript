@@ -1,3 +1,5 @@
+(load "helpers.scm")
+
 ;for generic helpers
 
 (define (ir-store name val)
@@ -52,7 +54,47 @@
 
 ;end gen-ir-cons
 
+;MACRO NOTES
+;ir macro stored as "name" : (cons (macro args) (macro body))
+;TODO: might have to save every macro to file if we are getting called in js repl
+;TODO: try macros in file generation
+(define macros (hash-new))
+
 (define (gen-ir-cons exp)
+   (define (ir-def-macro? exp) ;"did we encountered new macro definition?" check
+      (and (> (length exp) 2) (pair? (cadr exp))
+           (not (symbol? (cadr exp))) (eq? (car exp) 'define-macro)))
+
+   (define (ir-gen-macro args body) ;add the new macro to macros hash and return '()
+      ;(display "ir-gen-macro\n") (display args) (display "\n") (display body)
+      (hash-add macros (car args) (cons (cdr args) body)) ;(list (ir-tag 'macro-invoke) '(cons (cdr args) body)))
+      ;(ir-gen-null))
+      (ir-store (car args) (ir-gen-lambda (cadr args) body)))
+      ;(ir-gen-str (string-append "generated macro: " (symbol->string (car args)))))
+
+   ;invocation of macro => ir
+   (define (ir-macro-call? exp)
+      ;(define macro (ir-macro-call-get-macro exp))
+      ;(define is-macro-call (if (eq? macro '()) #f #t))
+      ;(if is-macro-call (display "calling macro") (display "not macro!"))
+      ;is-macro-call)
+      (not (eq? (ir-macro-call-get-macro exp) '())))
+
+   (define (ir-macro-call-get-macro exp)
+      (define name (car exp)) ;macro name (symbol?) to look up in macros
+      (define macro (hash-get macros name))
+      ;(display "macro name:") (display name) (display "\n")
+      ;(display "macro content:") (display macro) (display "\n")
+      macro)
+
+   (define (ir-expand-macro exp)
+      (define macro (ir-macro-call-get-macro exp))
+      (define func '())
+      (display "expanding macro")
+      ;(ir-gen-call (cdr exp) (ir-gen-lambda (car macro) (cdr macro))))
+      ;(ir-gen-str "macro expanding"))
+      )
+
    (define (get-func-name exp)
       (let ((test-name (car exp)))
          (cond ((symbol? test-name) test-name)
@@ -60,20 +102,26 @@
                 (let ((tmp-name (ir-get-tmp-name)))
                   (ir-store tmp-name (exp->ir test-name))
                   (string->symbol tmp-name)))
-               (else ir-gen-err (string-append "bad function name: " (to-string test-name))))))
+               (else (ir-gen-err
+                        (string-append "bad function name: "
+                                       (to-string test-name)))))))
 
    (let ((args (cdr exp))
          (name (get-func-name exp)))
       (cond
-         ((ir-def-func? exp) (ir-store (caar args) (ir-gen-lambda (cdr (car args)) (cdr args)))) ;last was (cadr args)
-         ((ir-lamb? exp) (ir-gen-lambda (car args) (cdr args)))
+         ((ir-def-macro? exp) (ir-gen-macro (car args) (cdr args)))
+         ((ir-macro-call? exp) (ir-expand-macro exp))
+         ((ir-def-func? exp)
+          (ir-store (caar args) (ir-gen-lambda (cdr (car args)) (cdr args)))) ;last was (cadr args)
          ((ir-def-ass? exp) (ir-store (car args) (exp->ir (cadr args))))
+         ((ir-lamb? exp) (ir-gen-lambda (car args) (cdr args)))
          ((ir-begin? exp) (ir-gen-begin args)) ;exp or args???
          ((ir-if? exp) (ir-gen-if exp))
          ((ir-cond? exp) (ir-gen-cond exp))
          ((ir-let? exp) (ir-gen-let exp))
          ((ir-special? exp) (ir-gen-special (car exp) (cdr exp)))
-         ((ir-call? exp) (ir-gen-call (car exp) (cdr exp)))
+         ((ir-call? exp) (ir-gen-call (car exp) (cdr exp))) ;kk comment for debug
+         ;((ir-call? exp) (begin (display macros) (ir-gen-call (car exp) (cdr exp)))) ;kk debug line uncomment for printing macros on function call
          (else (ir-gen-err "bad gen-ir-cons cond")))))
 
 ;for exp->ir
@@ -81,6 +129,10 @@
 (define (ir-gen-num n) (list (ir-tag 'num) n))
 (define (ir-gen-str s) (list (ir-tag 'str) s))
 (define (ir-gen-sym s) (list (ir-tag 'sym) s))
+
+(define (ir-gen-quasiquote exp) (list (ir-tag 'qq) exp))
+(define (ir-gen-unquote exp) (list (ir-tag 'uq) exp))
+(define (ir-gen-quote exp) (list (ir-tag 'q) exp))
 ;end exp->ir
 
 (define (exp->ir exp)
@@ -90,15 +142,21 @@
       ((number? exp) (ir-gen-num exp))
       ((string? exp) (ir-gen-str exp))
       ((symbol? exp) (ir-gen-sym exp))
+      ((and (pair? exp) (eq? (car exp) 'quasiquote))
+       (ir-gen-quasiquote (cdr exp)))
+      ((and (pair? exp) (eq? (car exp) 'unquote))
+       (ir-gen-unquote (cdr exp)))
+      ((and (pair? exp) (eq? (car exp) 'quote))
+       (ir-gen-quote (cdr exp)))
       ((pair? exp) (gen-ir-cons exp)) ;(cons 'block (gen-ir-cons exp)))
       (else (ir-gen-err "exp->ir call else called"))))
 
 (define (tag-remove-ir-rec e)
    (if (pair? e)
       (if (eq? (car e) 'ir)
-         (if (pair? (cdr e)) (map tag-remove-ir-rec (cdr e)) (cdr e))
-         (cons (if (is-tag? e) (cdar e) (map tag-remove-ir-rec (car e)))
-               (map tag-remove-ir-rec (cdr e))))
+         (if (pair? (cdr e)) (mymap tag-remove-ir-rec (cdr e)) (cdr e))
+         (cons (if (is-tag? e) (cdar e) (mymap tag-remove-ir-rec (car e)))
+               (mymap tag-remove-ir-rec (cdr e))))
       e))
 
 (define (runner exp)
@@ -125,6 +183,13 @@
         (cadr ir)) ;(cadr ir)) ;to display block, just use ir
    (display "\n"))
 
+(define (ir-repl)
+   (exp->ir (read))
+   (print-ir1 (exp->ir (read)) 0)
+   (ir-repl))
+;(print-ir1 (exp->ir (read)) 0)
+;(ir-repl)
+
 ;(define exp-lisp '((define (f x y) (- 3 10) (+ x 4 2))))
 ;(display (ir->js (exp->ir exp-lisp)))
 (define exp-lisp '((define x (+ 3 5)) (define (f x y) (- 3 10) (+ x y 4 2)))) ;works
@@ -138,5 +203,4 @@
 
 ;(print-ir1 (runner exp-lisp) 0)
 ;(print-ir1 (tag-remove-ir-rec (runner exp-lisp)) 0)
-
 

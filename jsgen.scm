@@ -160,9 +160,17 @@
          ((is-type? ir 'num) (number->string (car data))) ;(number->string data)
          ((is-type? ir 'sym) (lookup-func (symbol->string (car data)))) ;symbol->stirng (car data)
          ((is-type? ir 'str) (string-append "\"" (car data) "\""))
+         ((is-type? ir 'qq) "quasiquote!")
+         ((is-type? ir 'uq) "unquote!")
+         ((is-type? ir 'q) "normal quote")
          ((is-type? ir 'cond) "condTODO")
          ((is-type? ir 'let) "letTODO")
-         (else (string-append "BAD IR TYPE:" (symbol->string (get-type ir)))))))
+         ((is-type? ir 'null) "nullTODO")
+         (else
+            (begin
+               (display "UNKNOWN IR:") (display ir) (display "\n")
+               (string-append "BAD IR TYPE:"
+                              (symbol->string (get-type ir))))))))
 
 (define (repl-iter)
    (define exp (str->exp1 (stdin-read)))
@@ -177,6 +185,10 @@
              ;(display (ir->js (runner `(,exp)) 0))
              )))
    ;(display (emit-js-init))
+
+(define (repl-js)
+   (repl-iter)
+   (repl-js))
 
 (define (comp-file path)
    (define data (read-f path))

@@ -1,4 +1,43 @@
 
+(define (to-string s)
+   (cond
+      ((symbol? s) (symbol->string s))
+      ((number? s) (number->string s))
+      ((string? s) s)
+      (else s)))
+
+;TODO: should work for numbers, strings, symbols. cast everything to string
+(define (my=? a b)
+   (string=? (to-string a) (to-string b)))
+
+(define (_hash-strip-tag hash) (car hash))
+(define (_hash-add-tag _hash) (cons _hash 'hash))
+;internal hash operation
+(define (_hash-op hash f . args) (_hash-add-tag (apply f (cons (_hash-strip-tag hash) args))))
+
+;TODO: sort and do tree stuff
+(define (_hash-add _hash key val)
+   (cons (cons key val) _hash))
+(define (_hash-get _hash key)
+   (if (null? _hash)
+      '()
+      (let ((first (car _hash))
+            (rest (cdr _hash)))
+         (if (my=? (car first) key)
+            (car first)
+            (_hash-get (cdr _hash) key)))))
+
+(define (hash? hash) (and (pair? hash) (symbol? (cdr hash)) (eq? (cdr hash) 'hash)))
+(define (hash-new) (cons '() 'hash))
+
+(define (hash-add hash key val)
+   ;(_hash-op hash _hash-add key val))
+   (set-car! hash (_hash-add (_hash-strip-tag hash) key val)))
+(define (hash-get hash key)
+   ;(_hash-op hash _hash-get key))
+   (_hash-get (_hash-strip-tag hash) key))
+
+
 (define (to-string exp)
    (cond ((symbol? exp) (symbol->string exp))
          ((number? exp) (number->string exp))
