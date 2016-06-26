@@ -1,3 +1,12 @@
+(load "scm_lib.scm")
+(load "ir.scm")
+(load "helpers.scm")
+
+;(define newl "\n")
+(define newl "")
+(define semi ";")
+(define (iden x) x)
+(define (is-type? ir type) (eq? (get-type ir) type))
 
 (define (get-type ir)
    (if (and (pair? ir) (pair? (car ir)) (eq? (caar ir) 'ir))
@@ -12,18 +21,10 @@
       (cdr ir)
       'bad))
 
-(define (is-type? ir type) (eq? (get-type ir) type))
-
-;(define newl "\n")
-(define newl "")
-(define semi ";")
-
 (define (gen-js-blk data nest)
    ;(define newl "") ;newl "\n"
    (define semi ";")
    (string-append (make-tabs nest) "(function () {" newl (fold string-append "" (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest))) (reverse data))) newl "})()" semi newl))
-
-(define (iden x) x)
 
 (define (lookup-func name)
    (cond ((string=? name "+") "scm.sum")
@@ -55,8 +56,10 @@
       (lst->comma-str (map (lambda (x) (cadr x)) (car data)))
       ") {var ret = null;"
       (fold string-append ""
-            (map ;(lambda (x) (string-append newl (make-tabs (+ nest 2)) "ret = " (ir->js x nest)))
-                 (lambda (x) (string-append newl (make-tabs (+ nest 2)) "ret = " (ir->js x nest) semi))
+            (map
+                 (lambda (x)
+                  (define t (make-tabs (+ nest 2)))
+                  (string-append newl t "ret = " (ir->js x nest) semi))
                  (reverse (caadr data))))
       newl (make-tabs (+ nest 2)) "return ret;"
       newl (make-tabs ( + nest 1)) "})"))
@@ -74,16 +77,13 @@
                 (cond
                   ((and (= map-i 2) (string=? method "scm.obj_dict"))
                    (string-append "\"" (ir->js x nest) "\""))
-                  ((and (= map-i 3) (string=? method "scm.obj_dict") (string=? (ir->js x nest) "call"))
+                  ((and (= map-i 3) (string=? method "scm.obj_dict")
+                        (string=? (ir->js x nest) "call"))
                     (string-append "\"__ss_call__\""))
                   (else (ir->js x nest))))))
       (string-append
          method "("
-         ;(lst->comma-str (map (lambda (x) (cadr x)) (cadr data)))
-         ;(lst->comma-str (map (lambda (x) (ir->js (cadr x) nest)) (cadr data)))
-         ;(lst->comma-str (map (lambda (x) (car (ir->js x nest))) (cadr data)))
-         ;(lst->comma-str (map (lambda (x) (ir->js x nest)) (cadr data))) ;latest good
-         (lst->comma-str (map arg-mapper (cadr data))) ;latest good
+         (lst->comma-str (map arg-mapper (cadr data)))
          ")" semi)))
 
 (define (gen-js-assign data nest)
@@ -98,7 +98,6 @@
    ;(string-append "var " (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
    (string-append (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
 
-(load "scm_lib.scm")
 (define (emit-js-init)
    ;(read-f "js_std.js"))
    "var scm = require('./ssstd.js');")
@@ -136,16 +135,10 @@
    ;(display (emit-js-init))
    (helper))
 
-
 (define (comp-file path)
    (define data (read-f path))
    (define exp (str->exp data))
    (display (emit-js-init))
    ;(display (map (lambda (x) (ir->js x 0)) exp)))
    (display (map (lambda (x) (ir->js (exp->ir x) 0)) exp)))
-
-;(display (ir->js (runner exp-lisp) 0))
-;(repl-loop)
-(comp-file "misc/test.ss")
-
 

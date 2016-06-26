@@ -1,0 +1,5 @@
+(load "jsgen.scm")
+;(display (ir->js (runner exp-lisp) 0))
+;(repl-loop)
+;(comp-file "misc.test/cc")
+(comp-file "ir.scm")

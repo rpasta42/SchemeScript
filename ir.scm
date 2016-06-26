@@ -8,6 +8,7 @@
    (cons 'ir tag))
 (define (ir-tag? x)
    (and (pair? x) (pair? (car x)) (eq? (caar x) 'ir)))
+(define (is-tag? e) (and (pair? e) (pair? (car e)) (eq? (caar e) 'ir)))
 
 ;end generic helpers
 
@@ -37,9 +38,6 @@
 
 (define (ir-gen-lambda args body)
 ;   `(,(ir-tag 'lambda) ,(map exp->ir args) ,(exp->ir body)))
-;   (list (ir-tag 'lambda) (map exp->ir args) (map exp->ir body)))
-   ;(display body)
-   ;(list (ir-tag 'lambda) (map exp->ir args) (list (ir-tag 'block) (map (lambda (x) (exp->ir x)) body))))
    (list (ir-tag 'lambda) (map exp->ir args) (list (map (lambda (x) (exp->ir x)) body))))
 
 (define (ir-gen-begin exp)
@@ -48,7 +46,6 @@
 ;end gen-ir-cons
 
 (define (gen-ir-cons exp)
-
    (define (get-func-name exp)
       (let ((test-name (car exp)))
          (cond ((symbol? test-name) test-name)
@@ -86,8 +83,6 @@
       ((symbol? exp) (ir-gen-sym exp))
       ((pair? exp) (gen-ir-cons exp)) ;(cons 'block (gen-ir-cons exp)))
       (else (ir-gen-err "exp->ir call else called"))))
-
-(define (is-tag? e) (and (pair? e) (pair? (car e)) (eq? (caar e) 'ir)))
 
 (define (tag-remove-ir-rec e)
    (if (pair? e)
