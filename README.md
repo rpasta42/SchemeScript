@@ -1,6 +1,9 @@
 ## WARNING: THIS PROJECT IS IN VERY EARLY STAGE OF DEVELOPMENT
 # SchemeScript
 
+
+guile main.scm; guile main.scm  >ss_ir_test.js; nodejs ss_ir_test.js
+
 Experimental Scheme->Javascript REPL and cross compiler written in Scheme.
 
  from subset of Scheme to Javascript.

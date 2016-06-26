@@ -2,8 +2,8 @@
 (load "ir.scm")
 (load "helpers.scm")
 
-;(define newl "\n")
-(define newl "")
+(define newl "\n")
+;(define newl "")
 (define (br) (display newl))
 (define semi ";")
 (define (iden x) x)
@@ -25,7 +25,37 @@
 (define (gen-js-blk data nest)
    ;(define newl "") ;newl "\n"
    (define semi ";")
-   (string-append (make-tabs nest) "(function () {" newl (fold string-append "" (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest))) (reverse data))) newl "})()" semi newl))
+   (string-append
+      (make-tabs nest)
+      "(function () {" newl
+      (fold string-append
+            ""
+            (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest)))
+                 (reverse data)))
+      newl
+      "})()" semi newl))
+
+(define (clean-lisp-stuff name)
+   (define prev #\<)
+   (string-fold-right
+      (lambda (c str)
+         (define prep
+            (if (char=? prev #\-)
+               (if (char=? c #\>)
+                  "__TO__"
+                  "_")
+               ""))
+         (set! prev c)
+         (cond ;((char=? c #\=)
+               ;  (string-append "_kkeq_" str))
+               ((char=? c #\-)
+                 ;(string-append "_kkmin_" str))
+                 str);(string-append "_" str))
+               ((char=? c #\?)
+                 (string-append "_kkqm_" prep str))
+               (else (string-append (string c) prep str))))
+      ""
+      name))
 
 (define (lookup-func name)
    (cond ((string=? name "+") "scm.sum")
@@ -34,14 +64,14 @@
          ((string=? name "\\") "scm.obj_dict")
          ((string=? name ">") "scm.gt")
          ((string=? name "<") "scm.lt")
-         (else name)))
+         (else (clean-lisp-stuff name))))
 
 (define (gen-js-if data nest)
    (string-append
       "(function() {"
       ;"var pred = (function(){" (ir->js (car data))
-      "var __ss__pred = " (ir->js (car data) nest) ";"
-      "if (__ss__pred) return " (ir->js (cadr data) nest) ";"
+      "var __ss__pred = " (ir->js (car data) nest) ";" newl
+      "if (__ss__pred) return " (ir->js (cadr data) nest) ";" newl
       "return " (ir->js (caddr data) nest) ";"
       "})()"))
 
@@ -76,12 +106,14 @@
              (lambda (x)
                 (set! map-i (+ map-i 1))
                 (cond
+                  ((and (string=? method "quote") (= map-i 1))
+                   (string-append "\"" (to-string x) "\""))
                   ((and (= map-i 2) (string=? method "scm.obj_dict"))
                    (string-append "\"" (ir->js x nest) "\""))
                   ((and (= map-i 3) (string=? method "scm.obj_dict")
                         (string=? (ir->js x nest) "call"))
                     (string-append "\"__ss_call__\""))
-                  (else (ir->js x nest))))))
+                  (else (clean-lisp-stuff (ir->js x nest)))))))
       (string-append
          method "("
          (lst->comma-str (map arg-mapper (cadr data)))
@@ -97,7 +129,10 @@
 
    ;THIS BREAKS MY RETURN BULLSHIT (but mostly works):
    ;(string-append "var " (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
-   (string-append (ir->js (car data) nest) " = " (ir->js (cadr data) nest) ";" newl))
+   (string-append
+      (clean-lisp-stuff (ir->js (car data) nest))
+      " = "
+      (ir->js (cadr data) nest) ";" newl))
 
 (define (emit-js-init)
    ;(read-f "js_std.js"))
@@ -138,5 +173,7 @@
    ;(display (map (lambda (x) (ir->js x 0)) exp)))
    ;(display (map (lambda (x) (ir->js (exp->ir x) 0)) exp)))
    (map (lambda (x) (br) (display (ir->js (exp->ir x) 0))) exp))
+   ;(map (lambda (x) (map (lambda (y) (display "\n") (display (ir->js (exp->ir y) 0))) x)) exp))
+
 
 

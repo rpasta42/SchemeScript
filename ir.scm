@@ -25,6 +25,7 @@
 (define (ir-lamb? exp) (eq? (car exp) 'lambda)) ;check format
 (define (ir-if? exp) (eq? (car exp) 'if)) ;check more stuff here
 (define (ir-cond? exp) (eq? (car exp) 'cond)) ;check this stuff
+(define (ir-let? exp) (eq? (car exp) 'let))
 (define (ir-begin? exp) (and (pair? exp) (eq? (car exp) 'begin)))
 (define (ir-call? exp)
    (and (pair? exp) (> (length exp) 0)))
@@ -33,6 +34,8 @@
    (list (ir-tag 'if) (exp->ir (cadr exp)) (exp->ir (caddr exp)) (exp->ir (cadddr exp))))
 (define (ir-gen-cond exp)
    (ir-gen-err "cond not supported yet"))
+(define (ir-gen-let exp)
+   (ir-gen-err "unsupported let"))
 (define (ir-gen-call name args)
    (list (ir-tag 'call) (exp->ir name) (map exp->ir args)))
 
@@ -64,6 +67,7 @@
          ((ir-begin? exp) (ir-gen-begin args)) ;exp or args???
          ((ir-if? exp) (ir-gen-if exp))
          ((ir-cond? exp) (ir-gen-cond exp))
+         ((ir-let? exp) (ir-gen-let exp))
          ((ir-call? exp) (ir-gen-call (car exp) (cdr exp)))
          (else (ir-gen-err "bad gen-ir-cons cond")))))
 

@@ -2,6 +2,15 @@
 (define (to-string exp)
    (cond ((symbol? exp) (symbol->string exp))
          ((number? exp) (number->string exp))
+         ((string? exp) (string-append "\"" exp "\""))
+         ((pair? exp)
+          (string-append
+            "("
+            (fold (lambda (new old)
+                     (string-append old (to-string new)))
+                  ""
+                  exp)
+            ")"))
          (else "to-string: unknown type to convert to string")))
 
 (define (ir-gen-err msg) (list (ir-tag 'err) msg))
@@ -17,13 +26,16 @@
    (lambda (combine init lst)
          (if (null? lst)
             init
-            (fold combine (combine (car lst) init) (cdr lst)))))
-(define (map f lst)
+            (if (not (pair? lst))
+               (combine lst init)
+               (fold combine (combine (car lst) init) (cdr lst))))))
+
+(define (mymap f lst)
    (if (null? lst)
       '()
       (if (not (pair? lst))
          (cons (f lst) '())
-         (cons (f (car lst)) (map f (cdr lst))))))
+         (cons (f (car lst)) (mymap f (cdr lst))))))
 
 (define (make-tabs ntabs)
    (if (= ntabs 0)
