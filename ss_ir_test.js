@@ -1,6 +1,6 @@
 var scm = require('./ssstd.js');
 ir_store = (function (name, val) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)assign)")), exp_>ir(name), val);
+      ret = list(ir_tag(quote("((irsym)assign)")), exp__kk_gt_ir(name), val);
       return ret;
    });
 
@@ -65,45 +65,45 @@ ir_call_kkqm_ = (function (exp) {var ret = null;
    });
 
 ir_gen_if = (function (exp) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)if)")), exp_>ir(cadr(exp)), exp_>ir(caddr(exp)), exp_>ir(cadddr(exp)));
+      ret = list(ir_tag(quote("((irsym)if)")), exp__kk_gt_ir(cadr(exp)), exp__kk_gt_ir(caddr(exp)), exp__kk_gt_ir(cadddr(exp)));
       return ret;
    });
 
 ir_gen_cond = (function (exp) {var ret = null;
-      ret = ir_gen_err("cond not supported yet");
+      ret = list(ir_tag(quote("((irsym)cond)")));
       return ret;
    });
 
 ir_gen_let = (function (exp) {var ret = null;
-      ret = ir_gen_err("unsupported let");
+      ret = list(ir_tag(quote("((irsym)let)")));
       return ret;
    });
 
 ir_gen_call = (function (name, args) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)call)")), exp_>ir(name), map(exp_>ir, args));
+      ret = list(ir_tag(quote("((irsym)call)")), exp__kk_gt_ir(name), map(exp__kk_gt_ir, args));
       return ret;
    });
 
 ir_gen_lambda = (function (args, body) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)lambda)")), map(exp_>ir, args), list(map((function (x) {var ret = null;
-      ret = exp_>ir(x);
+      ret = list(ir_tag(quote("((irsym)lambda)")), map(exp__kk_gt_ir, args), list(map((function (x) {var ret = null;
+      ret = exp__kk_gt_ir(x);
       return ret;
    }), body)));
       return ret;
    });
 
 ir_gen_begin = (function (exp) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)block)")), map(exp_>ir, exp));
+      ret = list(ir_tag(quote("((irsym)block)")), map(exp__kk_gt_ir, exp));
       return ret;
    });
 
 gen_ir_cons = (function (exp) {var ret = null;
       ret = get_func_name = (function (exp) {var ret = null;
-      ret = BAD IR TYPE:err;
+      ret = letTODO;
       return ret;
    });
 ;
-      ret = BAD IR TYPE:err;
+      ret = letTODO;
       return ret;
    });
 
@@ -127,8 +127,8 @@ ir_gen_sym = (function (s) {var ret = null;
       return ret;
    });
 
-exp_>ir = (function (exp) {var ret = null;
-      ret = BAD IR TYPE:err;
+exp__kk_gt_ir = (function (exp) {var ret = null;
+      ret = condTODO;
       return ret;
    });
 
@@ -146,7 +146,7 @@ return e;})();
    });
 
 runner = (function (exp) {var ret = null;
-      ret = list(ir_tag(quote("((irsym)block)")), map(exp_>ir, exp));
+      ret = list(ir_tag(quote("((irsym)block)")), map(exp__kk_gt_ir, exp));
       return ret;
    });
 
@@ -154,23 +154,23 @@ print_ir = (function (ir, nest) {var ret = null;
       ret = (function() {var __ss__pred = pair_kkqm_(ir);
 if (__ss__pred) return (function() {var __ss__pred = eq_kkqm_(car(ir), quote("((irsym)block)"));
 if (__ss__pred) return (function () {
-   display("[")   map((function (x) {var ret = null;
+   display("[");   map((function (x) {var ret = null;
       ret = print_ir(x, scm.sum(nest, 1));
       return ret;
-   }), cdr(ir))   display("]")
+   }), cdr(ir));   display("]");
 })();
 ;
 return (function () {
-   display("(")   map((function (x) {var ret = null;
+   display("(");   map((function (x) {var ret = null;
       ret = display("(");
       ret = print_ir(x, nest);
       ret = display(")");
       return ret;
-   }), ir)   display(")")
+   }), ir);   display(")");
 })();
 ;})();
 return (function () {
-   display(ir)   display(" ")
+   display(ir);   display(" ");
 })();
 ;})();
       return ret;

@@ -2,7 +2,6 @@
 (load "ir.scm")
 (load "helpers.scm")
 
-(define newl "\n")
 ;(define newl "")
 (define (br) (display newl))
 (define semi ";")
@@ -25,12 +24,12 @@
 (define (gen-js-blk data nest)
    ;(define newl "") ;newl "\n"
    (define semi ";")
-   (string-append
+   (string-append ;"kkkk"
       (make-tabs nest)
       "(function () {" newl
       (fold string-append
             ""
-            (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest)))
+            (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest) ";"))
                  (reverse data)))
       newl
       "})()" semi newl))
@@ -51,11 +50,20 @@
                ((char=? c #\-)
                  ;(string-append "_kkmin_" str))
                  str);(string-append "_" str))
+               ((and (char=? c #\-) (char=? prev #\>)) "_TO_")
                ((char=? c #\?)
                  (string-append "_kkqm_" prep str))
+               ((char=? c #\>)
+                (string-append "_kk_gt_" prep str))
                (else (string-append (string c) prep str))))
       ""
-      name))
+      (if (symbol? name)
+         (if (eq? name 'in)
+            "_in_"
+            (symbol->string name))
+         (if (string=? name "in")
+            "_in"
+            name))))
 
 (define (lookup-func name)
    (cond ((string=? name "+") "scm.sum")
@@ -84,7 +92,7 @@
    (string-append
       (make-tabs nest)
       "(function ("
-      (lst->comma-str (map (lambda (x) (cadr x)) (car data)))
+      (lst->comma-str (map (lambda (x) (clean-lisp-stuff (cadr x))) (car data)))
       ") {var ret = null;"
       (fold string-append ""
             (map
@@ -150,10 +158,12 @@
          ((is-type? ir 'num) (number->string (car data))) ;(number->string data)
          ((is-type? ir 'sym) (symbol->string (car data)))
          ((is-type? ir 'str) (string-append "\"" (car data) "\""))
+         ((is-type? ir 'cond) "condTODO")
+         ((is-type? ir 'let) "letTODO")
          (else (string-append "BAD IR TYPE:" (symbol->string (get-type ir)))))))
 
 (define (repl-iter)
-   (define exp (str->exp (stdin-read)))
+   (define exp (str->exp1 (stdin-read)))
    (if (eq? exp 'exit)
       '()
       (begin (let ((comp-exp (exp->ir exp)))
@@ -163,7 +173,7 @@
                (display "\n"))
              ;(display "\n")
              ;(display (ir->js (runner `(,exp)) 0))
-             '())))
+             )))
    ;(display (emit-js-init))
 
 (define (comp-file path)

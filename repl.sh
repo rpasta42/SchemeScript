@@ -19,7 +19,8 @@ then
    fi
 
    while true; do
-      guile ir.scm 2>/tmp/bad_guile.log
+      #guile ir.scm 2>/tmp/bad_guile.log
+      guile main.scm 2>/tmp/bad_guile.log
    done
    ###END REPL HELPER
 fi

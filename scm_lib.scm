@@ -11,6 +11,8 @@
                (loop (read-char input-port)))))))
    ret)
 
+(define (str->exp1 str) (read (open-input-string str)))
+
 (define (str->exp str)
    (define in (open-input-string str))
    (define (rec in)

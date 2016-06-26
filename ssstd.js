@@ -40,7 +40,7 @@ function scm_arr_push(arr, e) {
 /*
 (\ test_obj test call)
 (\ test_obj test set newval)
-
+*/
 //first is object, second method, rest are arguments
 function scm_obj_dict() {
    var args = Array.prototype.slice.call(arguments);

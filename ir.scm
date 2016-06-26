@@ -33,9 +33,9 @@
 (define (ir-gen-if exp)
    (list (ir-tag 'if) (exp->ir (cadr exp)) (exp->ir (caddr exp)) (exp->ir (cadddr exp))))
 (define (ir-gen-cond exp)
-   (ir-gen-err "cond not supported yet"))
+   (list (ir-tag 'cond)));(ir-gen-err (list (ir-tag 'cond)))) ;"cond not supported yet"))
 (define (ir-gen-let exp)
-   (ir-gen-err "unsupported let"))
+   (list (ir-tag 'let)));(ir-gen-err (list (ir-tag 'let)))) ;(ir-gen-err "unsupported let"))
 (define (ir-gen-call name args)
    (list (ir-tag 'call) (exp->ir name) (map exp->ir args)))
 
