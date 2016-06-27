@@ -74,10 +74,13 @@
    '(tag div
       (style (test a) (test b))))
 
-(define test-exp-pic '(tag img (attr src "test.png")))
+(define test-exp;-pic
+   ;'(tag img (attr src "test.png")))
+   '(tag img (attr (src "test.png"))))
+
 ;(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
-(define test-exp;-table
+(define test-exp-table
    '(tag table
       (style (border-style solid) (border-color blue) (border-radius 5px) (border-width 1px))
       (tag tr
@@ -97,13 +100,8 @@
       ;(ref mypic)
       (tag a "ha")))
 
-(define main-doc (new-html-obj))
-(ho-set-name main-doc "body")
-(define result (html-syntax-macro main-doc test-exp))
 
 (define (draw-t n) (display (make-tabs n)))
-
-(define counter 0)
 
 (define (gen-html-obj obj tabs)
    (define attr-text "")
@@ -128,15 +126,11 @@
       (lambda (key entry)
          (set! other (string-append other " " entry))))
 
-   (if (< counter 0)
-      (begin
-         (set! counter (+ counter 1))
-         children)
-      (string-append
-         "<" (to-string (ho-get-name obj))
-         attr-text " style='" style-text "'>"
-         children " " other
-         "</" (to-string (ho-get-name obj)) ">")))
+   (string-append
+      "<" (to-string (ho-get-name obj))
+      attr-text " style='" style-text "'>"
+      children " " other
+      "</" (to-string (ho-get-name obj)) ">"))
 
 (define (display-html-obj obj tabs)
    (define (t) (display "\n") (draw-t tabs))
@@ -160,10 +154,26 @@
       (ho-get-tags obj)
       (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
 
-;(display-html-obj result 0)
-;(display "\n")
-(display (gen-html-obj result 0))
-(display "\n")
+(define-macro (h exp) ;h . exp
+   `(let ((main-doc (new-html-obj)))
+      (ho-set-name main-doc "body")
+      (display (quote ,exp))
+      (gen-html-obj (html-syntax-macro main-doc (quote ,exp)) 0)))
+
+(define (main)
+   (define main-doc (new-html-obj))
+   (define result (html-syntax-macro main-doc test-exp))
+   (ho-set-name main-doc "body")
+
+   ;(display-html-obj result 0)
+   ;(display "\n")
+   (display (gen-html-obj result 0))
+   (display "\n"))
+
+;(main)
+;(display (h (tag div (style (border-radius 10px)) (attr (id "yo") (color red)) (tag h1 "hello") (tag a "ha")))) ;(tag div "hello")))
+;(display (h (tag div (style (test a) (test b)))))
+(display (h (tag img (attr (src "test.png")))))
 
 ;(display result)
 
@@ -172,7 +182,7 @@
 ;(map (lambda (x) (display (if (pair? x) (mymap display x) x)) (display "\n") x) (cdr result))
 ;(map (lambda (x) (display (map display (if (pair? x) (car x) x)) (display "\n") x) result)
 
-result
+;result
 
 ;should output
 ;<div color='red' id='yo' class='hi' style='background-color: red; border-radius: 10px'>
