@@ -80,7 +80,7 @@
 (define test-exp ;-real
    '(tag div
       (attr (color red) (id "yo") (class "hi"))
-      (style (background-color red) (border-radius 10))
+      (style (background-color red) (border-radius 10px))
       (tag h1 "hello")
       ;(ref mypic)
       (tag a "ha")))
@@ -116,7 +116,7 @@
       (lambda (key entry)
          (set! other (string-append other " " entry))))
 
-   (if (< counter 2)
+   (if (< counter 0)
       (begin
          (set! counter (+ counter 1))
          children)
@@ -148,8 +148,8 @@
       (ho-get-tags obj)
       (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
 
-(display-html-obj result 0)
-(display "\n")
+;(display-html-obj result 0)
+;(display "\n")
 (display (gen-html-obj result 0))
 (display "\n")
 
@@ -160,11 +160,10 @@
 ;(map (lambda (x) (display (if (pair? x) (mymap display x) x)) (display "\n") x) (cdr result))
 ;(map (lambda (x) (display (map display (if (pair? x) (car x) x)) (display "\n") x) result)
 
-
 result
 
 ;should output
-;<div color='red' id='yo' class='hi' style='background-color: red; border-radius: 10'>
+;<div color='red' id='yo' class='hi' style='background-color: red; border-radius: 10px'>
 ;  <h1>hello</h1>
 ;  <a>ha</a>
 ;</div>
