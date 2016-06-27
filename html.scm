@@ -160,6 +160,11 @@
       (display (quote ,exp))
       (gen-html-obj (html-syntax-macro main-doc (quote ,exp)) 0)))
 
+(define-macro (tag . exp)
+   `(let ((main-doc (new-html-obj)))
+      (ho-set-name main-doc "body")
+      (display (gen-html-obj (html-syntax-macro main-doc (cons 'tag (quote ,exp))) 0))))
+
 (define (main)
    (define main-doc (new-html-obj))
    (define result (html-syntax-macro main-doc test-exp))
@@ -171,10 +176,14 @@
    (display "\n"))
 
 ;(main)
+;(display (h (tag div "hello")))
 ;(display (h (tag div (style (border-radius 10px)) (attr (id "yo") (color red)) (tag h1 "hello") (tag a "ha")))) ;(tag div "hello")))
 ;(display (h (tag div (style (test a) (test b)))))
-(display (h (tag img (attr (src "test.png")))))
+;(display (h (tag img (attr (src "test.png")))))
 
+(tag div "hello")
+
+;old...........
 ;(display result)
 
 ;(map (lambda (x) (display (if (pair? x) (car x) x)) (display "\n") x) (cdr result))
