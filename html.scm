@@ -77,7 +77,19 @@
 (define test-exp-pic '(tag img (attr src "test.png")))
 ;(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
-(define test-exp ;-real
+(define test-exp;fun-test
+   '(tag table
+      (style (border-style solid) (border-color blue) (border-radius 5px) (border-width 1px))
+      (tag tr
+         (style (border-style dotted) (border-color red) (border-width 1px) (border-radius 3px))
+         (tag td "Test") (tag td "Ha"))
+      (tag tr
+         (tag td "yo") (tag td "yoya"))
+      (tag tr
+         (tag td "yo" (style (border-width 15px) (border-style dotted) (background-color red))))))
+
+
+(define test-exp-real
    '(tag div
       (attr (color red) (id "yo") (class "hi"))
       (style (background-color red) (border-radius 10px))
