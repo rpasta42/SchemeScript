@@ -11,18 +11,20 @@
              (set-car! lst val))
       (set! lst (list val))));(set-car! lst val
 
-;(list name tags attrs styles)
-(define (new-html-obj) (list "" (hash-new) (hash-new) (hash-new)))
+;(list name tags attrs styles other)
+(define (new-html-obj) (list "" (hash-new) (hash-new) (hash-new) (hash-new)))
 
 (define (ho-get-name ho) (car ho))
 (define (ho-get-tags ho) (cadr ho))
 (define (ho-get-attrs ho) (caddr ho))
 (define (ho-get-styles ho) (cadddr ho))
+(define (ho-get-others ho) (cadr (cdddr ho)))
 
 (define (ho-set-name ho name) (set-car! ho name))
 (define (ho-add-tag ho tag)     (hash-add (ho-get-tags ho) (ir-get-tmp-name) tag))
 (define (ho-add-attr ho attr)   (hash-add (ho-get-attrs ho) (ir-get-tmp-name) attr))
 (define (ho-add-style ho style) (hash-add (ho-get-styles ho) (ir-get-tmp-name) style))
+(define (ho-add-other ho other) (hash-add (ho-get-others ho) (ir-get-tmp-name) other))
 
 (define (html-style-gen hobj styles)
    (if (null? styles)
@@ -30,21 +32,35 @@
       (begin (ho-add-style hobj (car styles))
              (html-style-gen hobj (cdr styles)))))
 
+(define (html-attr-gen hobj attrs)
+   (if (null? attrs)
+      '()
+      (begin (ho-add-attr hobj (car attrs))
+             (html-attr-gen hobj (cdr attrs)))))
+
 (define (html-syntax-macro-pair-sym hobj exp)
    (define obj-type (car exp))
    (cond
       ((eq? obj-type 'tag)
-       (begin
-         (ho-set-name hobj (cadr exp))
-         (map (lambda (x) (html-syntax-macro hobj x)) (cddr exp))) ;cddr or caddr??
+       (let ((d (new-html-obj)))
+         (ho-set-name d (cadr exp))
+         ;(ho-set-name hobj (cadr exp))
+         (map (lambda (x) (html-syntax-macro d x)) (cddr exp)) ;cddr or caddr??
+         (ho-add-tag hobj d)))
       ((eq? obj-type 'style) ;(ho-add-tag hobj (cadr exp)))
-       (cons "style" hobj));kkkk latest (html-style-gen hobj (cdr exp)))
-      (else (display "bad option in html parser")))))
+       ;(cons "style" hobj));kkkk latest
+       (html-style-gen hobj (cdr exp)))
+      ((eq? obj-type 'attr)
+       (html-attr-gen hobj (cdr exp)))
+      ((eq? obj-type 'ref)
+       (ho-add-tag hobj (eval-string (symbol->string (cadr exp)))))
+      (else (ho-add-other hobj exp))) ;(display "bad option in html parser"))))
    ;(ho-add-style hobj "random style"))))
+   hobj)
 
 (define (html-syntax-macro hobj exp)
    (cond
-      ((not (pair? exp)) (cons 'kkkzz (cons exp hobj)))
+      ((not (pair? exp)) (ho-add-other hobj exp)) ;(cons 'kkkzz (cons exp hobj)))
       ((symbol? (car exp))
        (begin (html-syntax-macro-pair-sym hobj exp)
               hobj))
@@ -52,14 +68,14 @@
                (html-syntax-macro hobj (car exp))
                (html-syntax-macro hobj (cdr exp))))))
 
-(define test-exp-pic
-   '(define my-pic (tag img (attr src "test.png"))))
-
-(define test-exp
+(define test-exp-fake
    '(tag div
       (style (test a) (test b))))
 
-(define test-exp-real
+(define test-exp-pic '(define my-pic (tag img (attr src "test.png"))))
+(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
+
+(define test-exp ;-real
    '(tag div
       (attr (color red) (id "yo") (class "hi"))
       (style (background-color red) (border-radius 10))
@@ -69,7 +85,40 @@
 
 (define main-doc (new-html-obj))
 (define result (html-syntax-macro main-doc test-exp))
-(map (lambda (x) (display (car x)) (display "\n") x) result)
+
+(define (draw-t n) (display (make-tabs n)))
+
+(define (display-html-obj obj tabs)
+   (define (t) (display "\n") (draw-t tabs))
+   ;(display ";;;;;;;;;;;;;;;;;")
+   (draw-t tabs) (display "name: ")
+   (display (ho-get-name obj))
+   (t) (display "other:")
+   (hash-map
+      (ho-get-others obj)
+      (lambda (key entry) (display "\n") (draw-t (+ tabs 1)) (display entry)))
+   (t) (display "attrs:")
+   (hash-map
+      (ho-get-attrs obj)
+      (lambda (key entry) (display "\n") (draw-t (+ tabs 1)) (display entry)))
+   (t) (display "styles:")
+   (hash-map
+      (ho-get-styles obj)
+      (lambda (key entry) (display "\n") (draw-t (+ tabs 1)) (display entry)))
+   (t) (display "memebers:")
+   (hash-map (ho-get-tags obj) (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
+
+(display-html-obj result 0)
+(display "\n")
+
+;(display result)
+
+;(map (lambda (x) (display (if (pair? x) (car x) x)) (display "\n") x) (cdr result))
+;(map (lambda (x) (display (if (pair? x) (car x) x)) (display "\n") x) result)
+;(map (lambda (x) (display (if (pair? x) (mymap display x) x)) (display "\n") x) (cdr result))
+;(map (lambda (x) (display (map display (if (pair? x) (car x) x)) (display "\n") x) result)
+
+
 result
 
 ;should output

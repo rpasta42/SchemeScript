@@ -38,6 +38,13 @@
          (if (my=? (car first) key)
             (car first)
             (_hash-get (cdr _hash) key)))))
+(define (_hash-map hash_ f)
+   (if (null? hash_)
+      '()
+      (let* ((i (car hash_))
+             (key (car i))
+             (entry (cdr i)))
+         (cons (f key entry) (_hash-map (cdr hash_) f)))))
 
 (define (hash? hash) (and (pair? hash) (symbol? (cdr hash)) (eq? (cdr hash) 'hash)))
 (define (hash-new) (cons '() 'hash))
@@ -48,7 +55,8 @@
 (define (hash-get hash key)
    ;(_hash-op hash _hash-get key))
    (_hash-get (_hash-strip-tag hash) key))
-
+(define (hash-map hash f)
+   (_hash-map (_hash-strip-tag hash) f))
 
 (define (ir-gen-err msg) (list (ir-tag 'err) msg))
 
