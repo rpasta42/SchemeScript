@@ -3,6 +3,10 @@
 
 left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
 
+http://www.biwascheme.org/doc/reference.html
+(define-macro (test expr) `(if ,expr #t (print (format "test failed: ~a" (quote ,expr)))))
+(test (= 1 2))
+
 guile main.scm; guile main.scm  >ss_ir_test.js; nodejs ss_ir_test.js
 guile main.scm >/tmp/racing.js; nodejs /tmp/racing.js
 

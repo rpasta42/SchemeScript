@@ -121,8 +121,6 @@ function phantom_screenshot(url, filename) {
      (tag h1 "hello")
      (tag a "ha")
      (ref mypic))
-;end winner
-
 
 ;more winrar examples
 (define ss (style ...))
