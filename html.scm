@@ -52,7 +52,7 @@
        (html-style-gen hobj (cdr exp)))
       ((eq? obj-type 'attr)
        (html-attr-gen hobj (cdr exp)))
-      ((eq? obj-type 'ref)
+      ((eq? obj-type 'ref) ;TODO: check ref type and add it to one of other categories
        (let* ((new (new-html-obj)) ;todo: copy tag example
               (obj (html-syntax-macro new (eval-string (symbol->string (cadr exp))))))
          (ho-add-tag hobj new)))
