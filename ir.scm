@@ -110,6 +110,7 @@
    (let ((args (cdr exp))
          (name (get-func-name exp)))
       (cond
+         ((and (symbol? (car exp)) (eq? (car exp) 'tag) (tag-ir exp)))
          ((ir-def-macro? exp) (ir-gen-macro (car args) (cdr args)))
          ((ir-macro-call? exp) (ir-expand-macro exp)) ;TODO
          ((ir-def-func? exp)

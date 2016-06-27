@@ -74,13 +74,13 @@
    '(tag div
       (style (test a) (test b))))
 
-(define test-exp-pic
+(define test-exp;-pic
    ;'(tag img (attr src "test.png")))
    '(tag img (attr (src "test.png"))))
 
 ;(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
-(define test-exp;-table
+(define test-exp-table
    '(tag table
       (style (border-style solid) (border-color blue) (border-radius 5px) (border-width 1px))
       (tag tr
@@ -160,14 +160,10 @@
       (display (quote ,exp))
       (gen-html-obj (html-syntax-macro main-doc (quote ,exp)) 0)))
 
-(define-macro (tag1 . exp)
+(define-macro (tag . exp)
    `(let ((main-doc (new-html-obj)))
       (ho-set-name main-doc "body")
-      (display
-         (gen-html-obj
-            (html-syntax-macro
-               main-doc
-               (cons 'tag (quote ,exp))) 0))))
+      (display (gen-html-obj (html-syntax-macro main-doc (cons 'tag (quote ,exp))) 0))))
 
 (define (main)
    (define main-doc (new-html-obj))
@@ -179,36 +175,13 @@
    (display (gen-html-obj result 0))
    (display "\n"))
 
-
-(define html-data "")
-
-(define (tag-ir exp)
-   (define main-doc (new-html-obj))
-   (define result (html-syntax-macro main-doc exp))
-   (ho-set-name main-doc "body")
-   (set! html-data
-         (string-append
-            html-data "\n\n\n"
-            (gen-html-obj result 0))))
-
-(define-macro (tag . exp)
-   `(let ((main-doc (new-html-obj)))
-      (ho-set-name main-doc "body")
-      (set! html-data
-            (string-append
-               html-data "\n\n\n"
-               (gen-html-obj
-                  (html-syntax-macro
-                     main-doc
-                     (cons 'tag (quote ,exp))) 0)))))
-
 ;(main)
 ;(display (h (tag div "hello")))
 ;(display (h (tag div (style (border-radius 10px)) (attr (id "yo") (color red)) (tag h1 "hello") (tag a "ha")))) ;(tag div "hello")))
 ;(display (h (tag div (style (test a) (test b)))))
 ;(display (h (tag img (attr (src "test.png")))))
 
-;(tag div "hello")
+(tag div "hello")
 
 ;old...........
 ;(display result)

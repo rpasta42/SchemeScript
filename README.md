@@ -3,6 +3,10 @@
 
 left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
 
+guile main.scm >/root/nginx-html/test1.html
+cp ssstd.js ~/nginx-html/
+chmod u+r ~/nginx-html/ssstd.js
+
 guile html.scm >/tmp/site.html; google-chrome /tmp/site.html
 guile html.scm >/tmp/test.html; firefox /tmp/test.html
 http://www.biwascheme.org/doc/reference.html

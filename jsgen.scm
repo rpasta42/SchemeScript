@@ -12,8 +12,8 @@
    (if (and (pair? ir) (pair? (car ir)) (eq? (caar ir) 'ir))
       (cdar ir)
       (begin
-         (display "bad ir: ")
-         (display ir)
+         ;(display "bad ir: ")
+         ;(display ir)
          'bad)))
 
 (define (get-data ir)
@@ -203,9 +203,10 @@
          ((is-type? ir 'null) "nullTODO")
          (else
             (begin
-               (display "UNKNOWN IR:") (display ir) (display "\n")
-               (string-append "BAD IR TYPE:"
-                              (symbol->string (get-type ir))))))))
+               ;(display "UNKNOWN IR:") (display ir) (display "\n")
+               ;(string-append "BAD IR TYPE:" (symbol->string (get-type ir)))
+               ;(display ir)
+               "")))))
 
 (define (repl-iter)
    (define exp (str->exp1 (stdin-read)))
@@ -221,10 +222,6 @@
              )))
    ;(display (emit-js-init))
 
-(define (repl-js)
-   (repl-iter)
-   (repl-js))
-
 (define (comp-file path)
    (define data (read-f path))
    (define exp (str->exp data))
@@ -233,6 +230,31 @@
    ;(display (map (lambda (x) (ir->js (exp->ir x) 0)) exp)))
    (map (lambda (x) (br) (display (ir->js (exp->ir x) 0))) exp))
    ;(map (lambda (x) (map (lambda (y) (display "\n") (display (ir->js (exp->ir y) 0))) x)) exp))
+
+(define (repl-js)
+   (repl-iter)
+   (repl-js))
+
+(load "html.scm")
+(define (comp-jshtml path)
+   (define data (read-f path))
+   (define exp (str->exp data))
+   (display
+      (string-append
+         "<html><head>\n"
+         "<script src='ssstd.js'></script>\n<script>"
+         (fold (lambda (next prev)
+                  (string-append prev ";\n" (ir->js (exp->ir next) 0)))
+               ""
+               exp)
+         "</script>"
+         ;(map
+         ;   (lambda (x) (br)
+         ;      (ir->js (exp->ir x) 0))
+         ;   exp)
+         "</head>"
+         html-data
+         "</html>")))
 
 
 

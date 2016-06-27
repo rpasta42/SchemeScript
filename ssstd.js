@@ -20,6 +20,9 @@ function scm_diff() {
    return diff;
 }
 
+function scm_mul() {
+}
+
 function scm_gt(a, b) {
    return a > b;
 }
@@ -179,7 +182,8 @@ if (typeof module !== 'undefined' && module.exports) {
       'diff': scm_diff,
       'gt': scm_gt,
       'lt': scm_lt,
-      'obj_dict': scm_obj_dict
+      'obj_dict': scm_obj_dict,
+      'mul' : scm_sum //TODO
    };
 }
 
