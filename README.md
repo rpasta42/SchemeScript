@@ -3,6 +3,7 @@
 
 left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
 
+guile html.scm >/tmp/site.html; google-chrome /tmp/site.html
 guile html.scm >/tmp/test.html; firefox /tmp/test.html
 http://www.biwascheme.org/doc/reference.html
 (define-macro (test expr) `(if ,expr #t (print (format "test failed: ~a" (quote ,expr)))))

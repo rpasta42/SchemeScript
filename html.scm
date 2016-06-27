@@ -77,7 +77,7 @@
 (define test-exp-pic '(tag img (attr src "test.png")))
 ;(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
-(define test-exp;fun-test
+(define test-exp;-table
    '(tag table
       (style (border-style solid) (border-color blue) (border-radius 5px) (border-width 1px))
       (tag tr
