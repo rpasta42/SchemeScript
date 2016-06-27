@@ -43,7 +43,6 @@
    (list (ir-tag 'let)));(ir-gen-err (list (ir-tag 'let)))) ;(ir-gen-err "unsupported let"))
 (define (ir-gen-call name args)
    (list (ir-tag 'call) (exp->ir name) (map exp->ir args)))
-
 (define (ir-gen-lambda args body)
 ;   `(,(ir-tag 'lambda) ,(map exp->ir args) ,(exp->ir body)))
    (list (ir-tag 'lambda) (map exp->ir args) (list (map (lambda (x) (exp->ir x)) body))))
@@ -69,7 +68,8 @@
       ;(display "ir-gen-macro\n") (display args) (display "\n") (display body)
       (hash-add macros (car args) (cons (cdr args) body)) ;(list (ir-tag 'macro-invoke) '(cons (cdr args) body)))
       ;(ir-gen-null))
-      (ir-store (car args) (ir-gen-lambda (cadr args) body)))
+      ;(ir-store (car args) (list (ir-tag 'lambda) (map exp->ir (cdr args)) body)))
+      (list (ir-tag 'macro-def) (car args) (cdr args) (map exp->ir (car body))))
       ;(ir-gen-str (string-append "generated macro: " (symbol->string (car args)))))
 
    ;invocation of macro => ir
@@ -87,13 +87,14 @@
       ;(display "macro content:") (display macro) (display "\n")
       macro)
 
+   ;call
    (define (ir-expand-macro exp)
       (define macro (ir-macro-call-get-macro exp))
       (define func '())
-      (display "expanding macro")
-      ;(ir-gen-call (cdr exp) (ir-gen-lambda (car macro) (cdr macro))))
+      ;(display "expanding macro")
+      (list (ir-tag 'macro-call) (exp->ir (car exp)) (cdr exp)))
       ;(ir-gen-str "macro expanding"))
-      )
+      ;(ir-gen-str "test")
 
    (define (get-func-name exp)
       (let ((test-name (car exp)))
@@ -110,7 +111,7 @@
          (name (get-func-name exp)))
       (cond
          ((ir-def-macro? exp) (ir-gen-macro (car args) (cdr args)))
-         ((ir-macro-call? exp) (ir-expand-macro exp))
+         ((ir-macro-call? exp) (ir-expand-macro exp)) ;TODO
          ((ir-def-func? exp)
           (ir-store (caar args) (ir-gen-lambda (cdr (car args)) (cdr args)))) ;last was (cadr args)
          ((ir-def-ass? exp) (ir-store (car args) (exp->ir (cadr args))))
@@ -149,7 +150,7 @@
       ((and (pair? exp) (eq? (car exp) 'quote))
        (ir-gen-quote (cdr exp)))
       ((pair? exp) (gen-ir-cons exp)) ;(cons 'block (gen-ir-cons exp)))
-      (else (ir-gen-err "exp->ir call else called"))))
+      (else (ir-gen-err (string-append "exp->ir call else called: " (to-string exp))))))
 
 (define (tag-remove-ir-rec e)
    (if (pair? e)

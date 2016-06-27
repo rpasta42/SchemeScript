@@ -1,10 +1,22 @@
+(define (to-string exp)
+   (cond ((symbol? exp) (symbol->string exp))
+         ((number? exp) (number->string exp))
+         ((string? exp) (string-append "\"" exp "\"")) ;exp)
+         ((pair? exp)
+          (string-append
+            "("
+            (fold (lambda (new old)
+                     (string-append old (to-string new)))
+                  ""
+                  exp)
+            ")"))
+         (else "to-string: unknown type to convert to string")))
 
-(define (to-string s)
-   (cond
-      ((symbol? s) (symbol->string s))
-      ((number? s) (number->string s))
-      ((string? s) s)
-      (else s)))
+(define (to-string1 s)
+   (cond ((symbol? s) (symbol->string s))
+         ((number? s) (number->string s))
+         ((string? s) s)
+         (else s)))
 
 ;TODO: should work for numbers, strings, symbols. cast everything to string
 (define (my=? a b)
@@ -37,20 +49,6 @@
    ;(_hash-op hash _hash-get key))
    (_hash-get (_hash-strip-tag hash) key))
 
-
-(define (to-string exp)
-   (cond ((symbol? exp) (symbol->string exp))
-         ((number? exp) (number->string exp))
-         ((string? exp) (string-append "\"" exp "\""))
-         ((pair? exp)
-          (string-append
-            "("
-            (fold (lambda (new old)
-                     (string-append old (to-string new)))
-                  ""
-                  exp)
-            ")"))
-         (else "to-string: unknown type to convert to string")))
 
 (define (ir-gen-err msg) (list (ir-tag 'err) msg))
 

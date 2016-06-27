@@ -148,6 +148,36 @@
    ;(read-f "js_std.js"))
    "var scm = require('./ssstd.js');")
 
+(define (gen-js-macro data)
+   (define name (car data))
+   (define args (cadr data))
+   (define body (caddr data))
+   ;(display "generating macro\name: ")
+   ;(display name) (display "\nargs: ")
+   ;(display args) (display "\nbody: ")
+   ;(display body) (display "\n")
+   (string-append
+      "\n" (to-string name) " = function/*macro*/("
+      ;(lst->comma-str args) ") { \"" (to-string body) "\""))
+      (lst->comma-str args) ") { \""
+      (fold string-append
+         ""
+         (map (lambda (x) (ir->js x 0)) body))
+      "\""))
+
+(define (gen-js-macro-call data nest)
+   ;(display data)
+   ;(display (cadr data))
+   (define map-i 0)
+   (define semi "") ;";"
+   ;"calling macro")
+   ;(define method (lookup-func (ir->js (car data) nest)))
+   (define method (car data))
+   (string-append
+      (symbol->string (cadr method)) "("
+      (lst->comma-str (map (lambda (x) (string-append " " (to-string x))) (cadr data)))
+      ")" semi))
+
 (define (ir->js ir nest)
    (let ((data (get-data ir)))
       (cond
@@ -160,9 +190,14 @@
          ((is-type? ir 'num) (number->string (car data))) ;(number->string data)
          ((is-type? ir 'sym) (lookup-func (symbol->string (car data)))) ;symbol->stirng (car data)
          ((is-type? ir 'str) (string-append "\"" (car data) "\""))
-         ((is-type? ir 'qq) "quasiquote!")
-         ((is-type? ir 'uq) "unquote!")
-         ((is-type? ir 'q) "normal quote")
+         ((is-type? ir 'macro-def) (gen-js-macro data))
+         ((is-type? ir 'macro-call) (gen-js-macro-call data nest))
+         ((is-type? ir 'qq) ;(ir->js (exp->ir data))) ;"!!!quasiquote!!!")
+          (string-append "!!!QQ!!!" (to-string data)))
+         ((is-type? ir 'uq) ;"!!!unquote!!!")
+          (ir->js (exp->ir (caar data)) 0))
+         ((is-type? ir 'q) ;"!!!quote!!!") ;(to-string data)) ;(to-string (str->exp data)))
+          (string-append "!!!Q!!!" (to-string data)))
          ((is-type? ir 'cond) "condTODO")
          ((is-type? ir 'let) "letTODO")
          ((is-type? ir 'null) "nullTODO")
