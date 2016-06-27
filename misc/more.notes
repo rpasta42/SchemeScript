@@ -1,0 +1,35 @@
+(define-macro (test expr) `(if) 'blah)
+(define-macro (test expr) (quasiquote (if)) (quote blah))
+
+(define-macro (test expr) `(if ,expr #t (print (format "test failed: ~a" (quote ,expr))))) (test (= 1 2))
+
+(define-macro (test expr) `(if ,expr #t (print (format "test failed: ~a" (quote ,expr)))))
+(test (= 1 2))
+
+
+
+(load "helpers.scm")
+(define h (hash-new))
+(hash-add h "test" "yo")
+(hash-add h "hahaha" 4)
+(hash-get h "hahaha")
+(hash-get h "test")
+
+
+work on digithinking erpnext/fedex/jhaudio after 5:30
+
+
+object system
+my language example
+compile itself to javascript
+implement read in javascript
+dictionary/lists/vectors/arrays/etc. modifying/accessing, everything else
+tetris in schemescript
+excel application in schemescript
+webgl schemescript/GameEngine/etc
+
+python generator for schemescript
+use imports/etc
+
+
+
