@@ -75,20 +75,56 @@
       (style (test a) (test b))))
 
 (define test-exp-pic '(tag img (attr src "test.png")))
-(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
+;(define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
 (define test-exp ;-real
    '(tag div
       (attr (color red) (id "yo") (class "hi"))
       (style (background-color red) (border-radius 10))
       (tag h1 "hello")
-      (tag a "ha")
-      (ref mypic)))
+      ;(ref mypic)
+      (tag a "ha")))
 
 (define main-doc (new-html-obj))
+(ho-set-name main-doc "body")
 (define result (html-syntax-macro main-doc test-exp))
 
 (define (draw-t n) (display (make-tabs n)))
+
+(define counter 0)
+
+(define (gen-html-obj obj tabs)
+   (define attr-text "")
+   (define style-text "")
+   (define children "")
+   (define other "")
+
+   (hash-map
+      (ho-get-attrs obj)
+      (lambda (key entry)
+         (set! attr-text (string-append attr-text " " (to-string (car entry)) "='" (to-string (cadr entry)) "' "))))
+   (hash-map
+      (ho-get-styles obj)
+      (lambda (key entry)
+         (set! style-text (string-append style-text (to-string (car entry)) ":" (to-string (cadr entry)) ";"))))
+   (hash-map
+      (ho-get-tags obj)
+      (lambda (key entry)
+         (set! children (string-append children (gen-html-obj entry (+ tabs 1))))))
+   (hash-map
+      (ho-get-others obj)
+      (lambda (key entry)
+         (set! other (string-append other " " entry))))
+
+   (if (< counter 2)
+      (begin
+         (set! counter (+ counter 1))
+         children)
+      (string-append
+         "<" (to-string (ho-get-name obj))
+         attr-text " style='" style-text "'>"
+         children " " other
+         "</" (to-string (ho-get-name obj)) ">")))
 
 (define (display-html-obj obj tabs)
    (define (t) (display "\n") (draw-t tabs))
@@ -113,6 +149,8 @@
       (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
 
 (display-html-obj result 0)
+(display "\n")
+(display (gen-html-obj result 0))
 (display "\n")
 
 ;(display result)

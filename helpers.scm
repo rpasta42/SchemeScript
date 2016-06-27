@@ -1,7 +1,7 @@
 (define (to-string exp)
    (cond ((symbol? exp) (symbol->string exp))
          ((number? exp) (number->string exp))
-         ((string? exp) (string-append "\"" exp "\"")) ;exp)
+         ((string? exp) exp);(string-append "\"" exp "\"")) ;exp)
          ((pair? exp)
           (string-append
             "("
