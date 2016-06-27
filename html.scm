@@ -53,7 +53,9 @@
       ((eq? obj-type 'attr)
        (html-attr-gen hobj (cdr exp)))
       ((eq? obj-type 'ref)
-       (ho-add-tag hobj (eval-string (symbol->string (cadr exp)))))
+       (let* ((new (new-html-obj)) ;todo: copy tag example
+              (obj (html-syntax-macro new (eval-string (symbol->string (cadr exp))))))
+         (ho-add-tag hobj new)))
       (else (ho-add-other hobj exp))) ;(display "bad option in html parser"))))
    ;(ho-add-style hobj "random style"))))
    hobj)
@@ -72,7 +74,7 @@
    '(tag div
       (style (test a) (test b))))
 
-(define test-exp-pic '(define my-pic (tag img (attr src "test.png"))))
+(define test-exp-pic '(tag img (attr src "test.png")))
 (define mypic (html-syntax-macro (new-html-obj) test-exp-pic))
 
 (define test-exp ;-real
@@ -106,7 +108,9 @@
       (ho-get-styles obj)
       (lambda (key entry) (display "\n") (draw-t (+ tabs 1)) (display entry)))
    (t) (display "memebers:")
-   (hash-map (ho-get-tags obj) (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
+   (hash-map
+      (ho-get-tags obj)
+      (lambda (key entry) (display "\n") (display-html-obj entry (+ tabs 1)))))
 
 (display-html-obj result 0)
 (display "\n")
