@@ -15,4 +15,5 @@
 
 
 (define newl "\n")
-(comp-jshtml "misc/test.ss")
+;(comp-jshtml "misc/test.ss")
+(comp-jshtml "misc/efcart.ss")

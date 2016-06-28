@@ -41,6 +41,7 @@ Features:
 - [x] Addition and subtraction
 
 High priority TODO's:
+- [ ] main.scm should accept different argument types
 - [ ] better REPL for UI
 - [ ] if and cond statements
 - [ ] efficient recursion or iteration mechanism
