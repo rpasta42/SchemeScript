@@ -1,3 +1,4 @@
 *.swp
 *~
 pwkg
+node_modules
