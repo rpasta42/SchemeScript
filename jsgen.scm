@@ -250,12 +250,14 @@
    (display
       (string-append
          "<html><head>\n"
-         "<script src='ssstd.js'></script>\n<script>"
+         "<script src='ssstd.js'></script>\n"
+         "<script src='jquery-2.2.4.min.js'></script>\n"
+         "\n<script>$(function() {"
          (fold (lambda (next prev)
                   (string-append prev ";\n" (ir->js (exp->ir next) 0)))
                ""
                exp)
-         "</script>"
+         "})</script>"
          ;(map
          ;   (lambda (x) (br)
          ;      (ir->js (exp->ir x) 0))

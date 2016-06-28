@@ -17,15 +17,12 @@
       ""))
 
 ;(alert (repeat-str "hello" 10))
-
-(define big-space
-   (repeat-str
-      (+ (repeat-str "&nbsp;" 10) "</br>")
-      10))
+(define big-space (repeat-str "&nbsp;" 3000))
+;(define first (repeat-str (+ (repeat-str "&nbsp;" 5) "</br>") 10))
 
 (tag div
    (style
-      (width 15el) (height 15el)
+      (width 30px) (height 30px)
       (position absolute)
       (overflow hidden)
       (background-color black))
@@ -33,8 +30,18 @@
    ;,big-space)
    ;"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</br>&nbsp;&nbsp;")
 
+(\ ($ "#square") html big-space)
 
-( \ ($ ".square") call html)
+(define n 1000)
+
+(define (f)
+   (if (> n 0)
+      (begin
+         (define n (- n 2))
+         (\ ($ "#square") css "left" (+ "" (- 1000 n) "px"))
+         (setTimeout f 30))
+      ""))
+(f)
 
 (tag br) (tag br)
 ;(alert "welcome to tetlisp")
