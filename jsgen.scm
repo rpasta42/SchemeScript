@@ -77,6 +77,8 @@
          ((string=? name "\\") "scm.obj_dict")
          ((string=? name ">") "scm.gt")
          ((string=? name "<") "scm.lt")
+         ((string=? name "new_arr") "scm.new_arr")
+         ((string=? name "for_each") "scm.for_each")
          (else (clean-lisp-stuff name))))
 
 (define (gen-js-if data nest)

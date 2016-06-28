@@ -9,11 +9,21 @@
       arrRange(start, [step], end) (js array range)
 */
 
-function for_each(lst, f) {
+function scm_for_each(lst, f) {
    for (var i in lst) {
       f(i, lst[i]);
    }
 }
+function scm_new_dict() {
+	return {};
+}
+function scm_new_arr() {
+	return [];
+}
+function scm_arr_push(arr, e) {
+	arr.push(e)
+}
+
 
 function scm_not(e) { return !e; }
 function scm_or() {
@@ -61,16 +71,6 @@ function scm_gt(a, b) {
 }
 function scm_lt(a, b) {
    return a < b;
-}
-
-function scm_new_dict() {
-	return {}
-}
-function scm_new_arr() {
-	return []
-}
-function scm_arr_push(arr, e) {
-	arr.push(e)
 }
 
 /*
@@ -203,6 +203,8 @@ function scm_el(name, attrs) {
 
 
 if (typeof module !== 'undefined' && module.exports) {
+   exports.new_arr = scm_new_arr;
+   exports.for_each = scm_for_each;
    exports.sum = scm_sum;
    exports.diff = scm_diff;
    exports.gt = scm_gt;
@@ -211,6 +213,8 @@ if (typeof module !== 'undefined' && module.exports) {
    exports.screenshot = phantom_screenshot;
 } else {
    scm = {
+      'new_arr': scm_new_arr,
+      'for_each': scm_for_each,
       'sum': scm_sum,
       'diff': scm_diff,
       'gt': scm_gt,
