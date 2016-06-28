@@ -48,7 +48,7 @@ function scm_mul() {
 
 function scm_sum() {
    var args = scm_sum.arguments;
-   var ret = 0;
+   var ret = (typeof args[0] == 'string') ? '' : 0;
    for (var arg in args) {
       ret += args[arg];
    }

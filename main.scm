@@ -5,7 +5,11 @@
 ;(repl-iter)
 
 (define newl "\n")
-(comp-file "misc/efcart/serv.ss")
+;server code
+;(comp-file "misc/efcart/serv.ss")
+;client
+;(comp-file "misc/efcart/efcart.ss")
+
 (display newl)
 ;(comp-file "misc.test/cc")
 ;(comp-file "ir.scm")
@@ -19,3 +23,4 @@
 (define newl "\n")
 ;(comp-jshtml "misc/test.ss")
 ;(comp-jshtml "misc/efcart.ss")
+(comp-jshtml "misc/tetlisp.ss")

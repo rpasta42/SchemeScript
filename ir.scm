@@ -36,7 +36,12 @@
         (or (eq? (car exp) 'tag) (eq? (car exp) 'style) (eq? (car exp) 'attr))))
 
 (define (ir-gen-if exp)
-   (list (ir-tag 'if) (exp->ir (cadr exp)) (exp->ir (caddr exp)) (exp->ir (cadddr exp))))
+   (list
+      (ir-tag 'if)
+      (exp->ir (cadr exp))
+      (exp->ir (caddr exp))
+      (exp->ir (cadddr exp))))
+
 (define (ir-gen-cond exp)
    (list (ir-tag 'cond)));(ir-gen-err (list (ir-tag 'cond)))) ;"cond not supported yet"))
 (define (ir-gen-let exp)

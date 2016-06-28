@@ -202,6 +202,7 @@
          ((is-type? ir 'qq) ;(ir->js (exp->ir data))) ;"!!!quasiquote!!!")
           (string-append "!!!QQ!!!" (to-string data)))
          ((is-type? ir 'uq) ;"!!!unquote!!!")
+         ;(eval (cdr exp)))
           (ir->js (exp->ir (caar data)) 0))
          ((is-type? ir 'q) ;"!!!quote!!!") ;(to-string data)) ;(to-string (str->exp data)))
           (string-append "!!!Q!!!" (to-string data)))
@@ -262,6 +263,4 @@
          "</head>"
          html-data
          "</html>")))
-
-
 
