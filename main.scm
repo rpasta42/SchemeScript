@@ -4,7 +4,9 @@
 ;(define newl "")
 ;(repl-iter)
 
-;(define newl "\n")
+(define newl "\n")
+(comp-file "misc/efcart/serv.ss")
+(display newl)
 ;(comp-file "misc.test/cc")
 ;(comp-file "ir.scm")
 ;(comp-file "scm_lib.scm")
@@ -16,4 +18,4 @@
 
 (define newl "\n")
 ;(comp-jshtml "misc/test.ss")
-(comp-jshtml "misc/efcart.ss")
+;(comp-jshtml "misc/efcart.ss")

@@ -29,7 +29,10 @@
       "(function () {" newl
       (fold string-append
             ""
-            (map (lambda (x) (string-append (make-tabs (+ nest 1)) (ir->js x nest) ";"))
+            (map (lambda (x)
+                  (string-append
+                     (make-tabs (+ nest 1)) ;(make-tabs nest)
+                     (ir->js x nest) ";"))
                  (reverse data)))
       newl
       "})()" semi newl))
@@ -99,11 +102,13 @@
       (fold string-append ""
             (map
                  (lambda (x)
-                  (define t (make-tabs (+ nest 2)))
+                  (define t (make-tabs (+ nest 1))) ;(+ nest 2)))
                   (string-append newl t "ret = " (ir->js x nest) semi))
                  (reverse (caadr data))))
-      newl (make-tabs (+ nest 2)) "return ret;"
-      newl (make-tabs ( + nest 1)) "})"))
+      newl
+      (make-tabs (+ nest 1)) ;(+ nest 2))
+      "return ret;"
+      newl (make-tabs nest) "})")) ;newl (make-tabs ( + nest 1)) "})"))
 
 (define (gen-js-call data nest)
    ;(display data)
