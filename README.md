@@ -72,3 +72,25 @@ Other unsupported things and TODO's:
 - [ ] Efficient Javascript generation
 - [ ] cons, list, car, cdr
 
+Flatris:
+
+width: 10
+height: 20
+
+xx
+ xx
+
+xx
+xx
+
+xxxx
+
+ x
+xxx
+
+x
+xxx
+
+  x
+xxx
+

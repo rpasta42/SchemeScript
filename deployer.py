@@ -21,9 +21,10 @@ notifier = pyinotify.Notifier(wm)
 def on_event(arg):
    name = arg.pathname
    #print('event %s' % name)
-   if name.split('.')[-1] == 'ss':
+   ext = name.split('.')[-1]
+   if ext == 'ss' or ext == 'scm':
       if debug:
-         print('python file changed: %s' % name)
+         print('scheme/sscript file changed: %s' % name)
       subprocess.call(['./deploy.sh'])
       #subprocess.call(['pkill', 'gunicorn'])
 

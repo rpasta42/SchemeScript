@@ -69,16 +69,32 @@
             name))))
 
 (define (lookup-func name)
-   (cond ((string=? name "+") "scm.sum")
-         ((string=? name "/") "scm.div")
-         ((string=? name "-") "scm.diff")
-         ((string=? name "=") "scm.eq")
-         ((string=? name "*") "scm.mul")
-         ((string=? name "\\") "scm.obj_dict")
-         ((string=? name ">") "scm.gt")
-         ((string=? name "<") "scm.lt")
-         ((string=? name "new_arr") "scm.new_arr")
-         ((string=? name "for_each") "scm.for_each")
+   (define (check c)
+      (string=? name c))
+
+   (cond ((check "!") "scm.not")
+         ((check "+") "scm.sum")
+         ((check "/") "scm.div")
+         ((check "-") "scm.diff")
+         ((check "=") "scm.eq")
+         ((check "*") "scm.mul")
+         ((check "\\") "scm.obj_dict")
+         ((check ">") "scm.gt")
+         ((check "<") "scm.lt")
+         ((check ">=") "scm.gt_eq")
+         ((check "<=") "scm.lt_eq")
+         ((check "cons") "scm.cons")
+         ((check "car") "scm.car")
+         ((check "cdr") "scm.cdr")
+         ((check "for-each") "scm.for_each")
+         ((check "new-dict")"scm.new_dict")
+         ((check "new-arr")"scm.new_arr")
+         ((check "arr-push")"scm.arr_push")
+         ((check "arr-i")"scm.arr_i")
+         ((check "arr-set")"scm.arr_set")
+         ((check "or")"scm.or")
+         ((check "and")"scm.and")
+         ((check "range")"scm.range")
          (else (clean-lisp-stuff name))))
 
 (define (gen-js-if data nest)
@@ -130,7 +146,8 @@
                   ((and (= map-i 3) (string=? method "scm.obj_dict")
                         (string=? (ir->js x nest) "call"))
                     (string-append "\"__ss_call__\""))
-                  (else (clean-lisp-stuff (ir->js x nest)))))))
+                  (else (ir->js x nest))))))
+                  ;(else (clean-lisp-stuff (ir->js x nest)))))))
       (string-append
          method "("
          (lst->comma-str (map arg-mapper (cadr data)))
@@ -152,7 +169,7 @@
       (ir->js (cadr data) nest) ";" newl))
 
 (define (emit-js-init)
-   ;(read-f "js_std.js"))
+   ;(read-f "js_std.js")
    "var scm = require('./ssstd.js');")
 
 (define (gen-js-macro data)
@@ -250,9 +267,9 @@
    (display
       (string-append
          "<html><head>\n"
-         "<script src='ssstd.js'></script>\n"
          "<script src='jquery-2.2.4.min.js'></script>\n"
-         "\n<script>$(function() {"
+         "<script src='ssstd.js'></script>\n"
+         "\n<script>$(document).ready(function() {"
          (fold (lambda (next prev)
                   (string-append prev ";\n" (ir->js (exp->ir next) 0)))
                ""

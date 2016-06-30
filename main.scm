@@ -24,3 +24,4 @@
 ;(comp-jshtml "misc/test.ss")
 ;(comp-jshtml "misc/efcart.ss")
 (comp-jshtml "misc/tetlisp.ss")
+;(comp-jshtml "misc/example_kittens_btns_moving.ss")

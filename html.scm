@@ -45,17 +45,18 @@
        (let ((d (new-html-obj)))
          (ho-set-name d (cadr exp))
          ;(ho-set-name hobj (cadr exp))
-         (map (lambda (x) (html-syntax-macro d x)) (cddr exp)) ;cddr or caddr??
+         ;cddr or caddr??
+         (map (lambda (x) (html-syntax-macro d x)) (cddr exp))
          (ho-add-tag hobj d)))
       ((eq? obj-type 'style) ;(ho-add-tag hobj (cadr exp)))
        ;(cons "style" hobj));kkkk latest
        (html-style-gen hobj (cdr exp)))
       ((eq? obj-type 'attr)
        (html-attr-gen hobj (cdr exp)))
-      ((eq? obj-type 'ref) ;TODO: check ref type and add it to one of other categories
+      ((eq? obj-type 'ref) ;TODO: broken!! check ref type and add it to one of other categories
        (let* ((new (new-html-obj)) ;todo: copy tag example
-              (obj (html-syntax-macro new (eval-string (symbol->string (cadr exp))))))
-         (ho-add-tag hobj new)))
+             (obj (html-syntax-macro new (eval-string (symbol->string (cadr exp))))))
+         (html-syntax-macro obj new)))
       (else (ho-add-other hobj exp))) ;(display "bad option in html parser"))))
    ;(ho-add-style hobj "random style"))))
    hobj)
