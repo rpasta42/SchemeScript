@@ -6,6 +6,7 @@
    (attr (id "score")) (style (float right))
    "0 points")
 
+(define exit false)
 (define rand-str-ctr 0)
 (define (rand-str)
    (define new-str (+ "tmp" (String rand-str-ctr)))
@@ -155,14 +156,13 @@
          (set-pix-color sq-id color)
          (cons (+ 1 (car x)) (cdr x)))))
 
-(define exit1 false)
 
 (define (draw-stable b)
    (define points 0)
    (\ shapes-stable map
       (lambda (p)
          (define points (+ points 1))
-         ;(if (< (car p) 0) (begin (alert "you lost!") (define exit1 true)) "")
+         (if (= (car p) 0) (begin (alert "you lost!") (define exit true)) "")
          (define sq-id (get-pix-id board (car p) (cdr p)))
          ;(console.log "id:")
          ;(console.log sq-id)
@@ -188,7 +188,7 @@
                   (if (= keypress "d") (define y (+ y 1)) "")
                   ;(if (= keypress "s") (define x (+ x 1)) "")
                   (if (= keypress "q")
-                     (begin (define tmp x) (define x y)) (define y x)) "")))
+                     (begin (define tmp x) (define x y) (define y tmp)) "")))
             (cons x y))))
 
    (define (test-bad)
@@ -264,7 +264,7 @@
    (define kdelay main-loop-delay)
    (if (= keypress "s") (define kdelay 1) "")
 
-   (if (and (> game-loop-counter 0) (! exit1))
+   (if (and (> game-loop-counter 0) (! exit))
       (begin
          (define game-loop-counter (- game-loop-counter 1))
          (step b)
