@@ -11,11 +11,11 @@
 
 function scm_not(e) { return !e; }
 function scm_for_each(lst, f) {
-   var ret = [];
+   var ret_ = [];
    for (var i in lst) {
-      ret.push(f(i, lst[i]));
+      ret_.push(f(i, lst[i]));
    }
-   return ret;
+   return ret_;
 }
 function scm_cons(a, b) { return [a, b]; }
 function scm_car(x) { return x[0]; }
@@ -37,14 +37,14 @@ function scm_arr_set(arr, i, val) {
    arr[i] = val;
 }
 function scm_or() { //TODO: short circuit
-   var args = scm_not.arguments;
+   var args = scm_or.arguments;
    for (var i in args) {
-      if (args[i]) return true;
+      if (args[i]) return args[i];
    }
    return false;
 }
 function scm_and() { //TODO: short circuit
-   var args = scm_not.arguments;
+   var args = scm_and.arguments;
    for (var i in args) {
       if (!args[i]) return false;
    }
