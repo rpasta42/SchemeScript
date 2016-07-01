@@ -34,11 +34,18 @@
 (define (get-pix-id pixels horiz vert) (arr-i (arr-i pixels horiz) vert))
 (define (set-pix-color id color) (\ ($ id) css "background-color" color))
 
+(define ok-fire true)
+
 (define document.onkeypress
    (lambda (e)
       (define e (or e window.event))
       (define charCode (or e.charCode e.keyCode))
       (define keypress (String.fromCharCode charCode))
+      (setTimeout (lambda () (define ok-fire true)) 1)
+
+      (if (and ok-fire (= keypress "s")) ;okfire
+         (step board) "")
+      (define ok-fire false)
       (console.log "key pressed: ") (console.log keypress)))
 
 (tag
@@ -155,15 +162,14 @@
 
    ;(alert (JSON.stringify rows))
    (define shapes-stable-new (new-arr))
-
-   (define num-skipped 0)
-
+   ;(define num-skipped 0)
    (\ shapes-stable map
       (lambda (p)
          (define row-index (car p))
-         (if (< (\ (arr-i rows row-index) length) 9)
-            (arr-push shapes-stable-new (cons (+ num-skipped (car p)) (cdr p)))
-            (define num-skipped (+ num-skipped 1)))))
+         (if (< (\ (arr-i rows row-index) length) 11)
+            (arr-push shapes-stable-new p) "")))
+            ;(arr-push shapes-stable-new (cons (+ num-skipped (car p)) (cdr p)))
+            ;(define num-skipped (+ num-skipped 1)))))
 
    (define shapes-stable shapes-stable-new)
 

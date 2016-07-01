@@ -74,6 +74,16 @@ Other unsupported things and TODO's:
 
 Flatris:
 
+cos(90) = 0
+sin(90) = 1
+x' = x*cosT + y*sinT
+y' = -x*sinT + y*cosT
+x' = y
+y' = -x
+
+TODO:
+   on of squares in shape-stable < 0, alert("you lost")
+
 width: 10
 height: 20
 
