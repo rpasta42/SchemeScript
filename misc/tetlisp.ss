@@ -18,14 +18,6 @@
 
 (define (repeat-str s n) (if (> n 0) (+ s (repeat-str s (- n 1))) ""))
 (define big-space (repeat-str "&nbsp;" 3000))
-
-(define document.onkeypress
-   (lambda (e)
-      (define e (or e window.event))
-      (define charCode (or e.charCode e.keyCode))
-      (define keypress (String.fromCharCode charCode))
-      (console.log "key pressed: ") (console.log keypress)))
-
 ;TODO: calculate width and height dynamically
 (define cube-width 30)
 (define cube-height 30)
@@ -33,6 +25,21 @@
 (define num-cub-vert 20)
 (define game-loop-counter 4000)
 (define main-loop-delay 500) ;1000) ;5000) ;200)
+(define current-shape null)
+(define current-moves (new-arr)) ;can use it as hack for rotation
+(define shapes-stable (new-arr)) ;not shapes, but just squares tbh
+;(define (has-movement) )
+;(define shapes-stored (new-arr))
+(define keypress "none")
+(define (get-pix-id pixels horiz vert) (arr-i (arr-i pixels horiz) vert))
+(define (set-pix-color id color) (\ ($ id) css "background-color" color))
+
+(define document.onkeypress
+   (lambda (e)
+      (define e (or e window.event))
+      (define charCode (or e.charCode e.keyCode))
+      (define keypress (String.fromCharCode charCode))
+      (console.log "key pressed: ") (console.log keypress)))
 
 (tag
    div
@@ -107,15 +114,6 @@
    (\ z push (cons 2 0))
    z)
 
-(define (get-pix-id pixels horiz vert) (arr-i (arr-i pixels horiz) vert))
-(define (set-pix-color id color) (\ ($ id) css "background-color" color))
-
-;(define (has-movement) )
-;(define shapes-stored (new-arr))
-(define current-shape null)
-(define shapes-stable (new-arr)) ;not shapes, but just squares tbh
-(define keypress "none")
-
 (define (get-new-shape type board-squares color) ;"red" by default
    (define shape-squares (new-arr))
    (if (= type "ziggy") (define shape-squares (get-ziggy)) "")
@@ -145,20 +143,33 @@
    (define board-squares (new-board-squares))
    board-squares)
 
-(define (move-down shape-s board)
-   (define color "red")
-   (console.log "kk") (console.log shape-s)
-   (\ shape-s map
-      (lambda (x)
-         (define sq-id (get-pix-id board (+ 1 (car x)) (cdr x)))
-         (console.log "id:")
-         (console.log sq-id)
-         (set-pix-color sq-id color)
-         (cons (+ 1 (car x)) (cdr x)))))
-
-
 (define (draw-stable b)
    (define points 0)
+
+   (define rows (for-each (range 0 num-cub-vert) (lambda () (new-arr))))
+
+   (\ shapes-stable map
+      (lambda (p)
+         (define row-index (car p))
+         (arr-push (arr-i rows row-index) (cdr p))))
+
+   ;(alert (JSON.stringify rows))
+   (define shapes-stable-new (new-arr))
+
+   (define num-skipped 0)
+
+   (\ shapes-stable map
+      (lambda (p)
+         (define row-index (car p))
+         (if (< (\ (arr-i rows row-index) length) 9)
+            (arr-push shapes-stable-new (cons (+ num-skipped (car p)) (cdr p)))
+            (define num-skipped (+ num-skipped 1)))))
+
+   (define shapes-stable shapes-stable-new)
+
+   ;(for-each rows
+   ;   (lambda (i x) (if (> x.length 9) (alert (+ "big row" (String i))) "")))
+
    (\ shapes-stable map
       (lambda (p)
          (define points (+ points 1))
@@ -177,6 +188,7 @@
 
 (define (process-moving-shape-not-null board)
    (define bad false)
+   (arr-push current-moves keypress)
 
    (define (get-testpoints usekey)
       (\ current-shape map
@@ -215,6 +227,9 @@
          (test-bad))
       "")
 
+   (define colors (new-arr "#3cc7d6" "#fbb414" "#e84138" "#3993d0"))
+   (define color (arr-i colors (Math.floor (* (Math.random) colors.length))))
+
    (if bad
       (begin
          (\ current-shape map
@@ -225,7 +240,7 @@
          (\ current-shape map
             (lambda (p)
                (define sq-id (get-pix-id board (car p) (cdr p)))
-               (set-pix-color sq-id "red"))))))
+               (set-pix-color sq-id color))))))
 
 (define (step b)
    (define z (- 1000 game-loop-counter))
@@ -257,7 +272,6 @@
    ;   (define counter555 (+ counter555 1))))
    (if (! (= current-shape null)) ""
       (define current-shape (get-new-shape shape-type b "red"))))
-
 
 (define (game-loop b)
    (console.log "i")
