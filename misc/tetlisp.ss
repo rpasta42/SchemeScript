@@ -31,7 +31,7 @@
 ;(define (has-movement) )
 ;(define shapes-stored (new-arr))
 (define keypress "none")
-(define (get-pix-id pixels horiz vert) (arr-i (arr-i pixels horiz) vert))
+(define (get-pix-id pixels horiz vert) (\ (\ pixels horiz) vert))
 (define (set-pix-color id color) (\ ($ id) css "background-color" color))
 
 (define ok-fire true)
