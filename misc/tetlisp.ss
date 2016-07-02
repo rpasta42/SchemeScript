@@ -195,19 +195,24 @@
 (define (process-moving-shape-not-null board)
    (define bad false)
    (arr-push current-moves keypress)
+   (if (= keypress "q")
+      (define current-shape (get-new-shape shape-type board "red")) "")
 
    (define (get-testpoints usekey)
-      (\ current-shape map
-         (lambda (p)
-            (define x (+ 1 (car p))) (define y (cdr p))
-            (if (! usekey) ""
-               (begin
-                  (if (= keypress "a") (define y (- y 1)) "")
-                  (if (= keypress "d") (define y (+ y 1)) "")
-                  ;(if (= keypress "s") (define x (+ x 1)) "")
-                  (if (= keypress "q")
-                     (begin (define tmp x) (define x y) (define y tmp)) "")))
-            (cons x y))))
+      (define ret
+         (\ current-shape map
+            (lambda (p)
+               (define x (+ 1 (car p))) (define y (cdr p))
+               (if (! usekey) ""
+                  (begin
+                     (if (= keypress "a") (define y (- y 1)) "")
+                     (if (= keypress "d") (define y (+ y 1)) "")
+                     ;(if (= keypress "s") (define x (+ x 1)) "")
+                     (if (= keypress "q")
+                        (begin (define tmp x) (define x y) (define y tmp)) "")))
+               (cons x y))))
+      ret)
+
 
    (define (test-bad)
       (\ testpoints map
