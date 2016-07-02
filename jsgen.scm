@@ -88,10 +88,11 @@
          ((check "car") "scm.car")
          ((check "cdr") "scm.cdr")
          ((or (check "for-each")
-              (check "map"))
+              #f) ;(check "map"))
           "scm.for_each")
          ((check "new-dict")"scm.new_dict")
          ((check "new-arr")"scm.new_arr")
+         ;just use normal obj syntax
          ((check "arr-push")"scm.arr_push")
          ((check "arr-i")"scm.arr_i")
          ((check "arr-set")"scm.arr_set")

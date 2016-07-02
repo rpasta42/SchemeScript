@@ -8,6 +8,8 @@
       <=, >=,
       arrRange(start, [step], end) (js array range)
 */
+function scm_arr_push(arr, e) {arr.push(e)}
+function scm_arr_i(arr, i) {  return arr[i]; }//index
 
 function scm_not(e) { return !e; }
 function scm_for_each(lst, f) {
@@ -26,12 +28,6 @@ function scm_new_dict() {
 function scm_new_arr() {
    var args = Array.prototype.slice.call(arguments);
    return args;
-}
-function scm_arr_push(arr, e) {
-	arr.push(e)
-}
-function scm_arr_i(arr, i) { //index
-   return arr[i];
 }
 function scm_arr_set(arr, i, val) {
    arr[i] = val;
@@ -164,8 +160,6 @@ exports.car = scm_car;
 exports.cdr = scm_cdr;
 exports.new_dict = scm_new_dict;
 exports.new_arr = scm_new_arr;
-exports.arr_push = scm_arr_push;
-exports.arr_i = scm_arr_i;
 exports.arr_set = scm_arr_set;
 exports.or = scm_or;
 exports.and = scm_and;
@@ -179,3 +173,5 @@ exports.gt_eq = scm_gt_eq;
 exports.lt_eq = scm_lt_eq;
 exports.eq = scm_eq;
 exports.obj_dict = scm_obj_dict;
+exports.arr_i = scm_arr_i;
+exports.arr_push = scm_arr_push;

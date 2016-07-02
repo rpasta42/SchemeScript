@@ -110,7 +110,7 @@
 (define (_get-tank-bottom) (new-arr (cons 1 0) (cons 1 1) (cons 1 2)))
 (define (get-tank)
    (define z (_get-tank-bottom))
-   (\ z push (cons 1 0))
+   (\ z push (cons 0 1))
    z)
 (define (get-tankl)
    (define z (_get-tank-bottom))
@@ -118,7 +118,7 @@
    z)
 (define (get-tankr)
    (define z (_get-tank-bottom))
-   (\ z push (cons 2 0))
+   (\ z push (cons 0 2))
    z)
 
 (define (get-new-shape type board-squares color) ;"red" by default
