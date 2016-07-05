@@ -1,10 +1,10 @@
 
 function conf() {
    //( ) { } [ ] ' , "
+
+   //o_paren, c_paren, o_square_br, c_square_br
    var lexemeTypes = ['sym', 'num', 'str', 'paren', 'quote', 'comment'];
-
    this.lexemeTypes = lexemeTypes;
-
    return this;
 }
 
@@ -18,7 +18,22 @@ var c = conf();
 //and single & multi-line comments.
 //Note: parenthesis don't count as blocks
 function _lex_get_block_ranges(var str) {
-   var ranges = [];
+   function mk_blk(start, end, type, extra) {
+      var ret = {};
+      ret.start = start;
+      ret.end = end;
+      ret.type = type;
+      if (extra != null)
+         ret.extra = extra;
+      return ret;
+   }
+
+   //open = true|false, paren_type = '('|'{'|'['
+   function mk_paren_extra(open, paren_type) {
+
+   }
+
+   var blk_ranges = [];
 
    var cmnt_start = null;
    var str_start = null;
@@ -40,18 +55,24 @@ function _lex_get_block_ranges(var str) {
 
          if (escape) { escape = false; continue; }
 
-         switch (c) {
-         case '\\': {
+         if (c == '\\' && str_start != null) {
+            escape = true;
+         }
+         else if (c == '"' && cmnt_start == null) {
+            if (str_start == null)
+               str_start = real_i;
+            else {
+               blk_ranges.push(mk_blk('str', str_start, real_i));
+               str_start = null;
+            }
+         }
+         else if (c == ';' && cmnt_start == null && str_start == null) {
+            blk_ranges.push(mk_blk('comment',
+
 
          }
-
-         }
-
-
 
       }
-
-
    }
 
 }
