@@ -38,6 +38,15 @@ function _lex_get_block_ranges(var str) {
          var c = line[i];
          var real_i = line_start + i; //index into str of current char
 
+         if (escape) { escape = false; continue; }
+
+         switch (c) {
+         case '\\': {
+
+         }
+
+         }
+
 
 
       }
