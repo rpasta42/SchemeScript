@@ -124,7 +124,11 @@ function scm_obj_dict() {
    var member = args[1];
 
    if (args.length == 2) {
-      //alert('getting dict member');
+      alert('getting dict member: ' + member + '; type: ' + eval('typeof member'));
+      if (typeof eval(member) == string) { //TODO: funky
+         member = eval(eval(member));
+         console.log('new member after eval: ' + member);
+      }
       return obj[member];
    }
    else if (args.length > 2) {
@@ -175,3 +179,4 @@ exports.eq = scm_eq;
 exports.obj_dict = scm_obj_dict;
 exports.arr_i = scm_arr_i;
 exports.arr_push = scm_arr_push;
+
