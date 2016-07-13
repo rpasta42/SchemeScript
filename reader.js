@@ -10,27 +10,20 @@ function conf() {
 
 var c = conf();
 
-
 //internal lexer function
 //Block is a lexeme type which stores parts of
 //code that don't get parsed but just get stored
 //as a string. Currently, blocks include strings
 //and single & multi-line comments.
 //Note: parenthesis don't count as blocks
-function _lex_get_block_ranges(var str) {
-   function mk_blk(start, end, type, extra) {
+function _lex_get_block_ranges(str) {
+   //blk type = 'str'|';'|'#|'
+   function mk_blk(type, start, end) {
       var ret = {};
       ret.start = start;
       ret.end = end;
       ret.type = type;
-      if (extra != null)
-         ret.extra = extra;
       return ret;
-   }
-
-   //open = true|false, paren_type = '('|'{'|'['
-   function mk_paren_extra(open, paren_type) {
-
    }
 
    var blk_ranges = [];
@@ -67,21 +60,51 @@ function _lex_get_block_ranges(var str) {
             }
          }
          else if (c == ';' && cmnt_start == null && str_start == null) {
-            blk_ranges.push(mk_blk('comment',
-
-
+            blk_ranges.push(mk_blk(';', real_i, line_end));
+            break; //go to next line
+         }
+         else if (c == '|' && str_start == null) {
+            if (cmnt_start == null && multi_first_char) {
+               cmnt_start = real_i-1;
+            } else {
+               multi_first_char = true;
+               continue;
+            }
+         }
+         else if (c == '#' && str_start == null) {
+            if (cmnt_start == null) {
+               multi_first_char = true;
+               continue;
+            }
+            else if (multi_first_char) {
+               blk_ranges.push(mk_blk('#|', cmnt_start, real_i));
+               cmnt_start = null;
+            }
          }
 
+         multi_first_char = false;
       }
+
+      line_start = line_end;
    }
 
+   return blk_ranges;
 }
 
-function lex(var str) {
+function lex(str) {
 
 }
 
 function parse(lexemes) {
-
-
 }
+
+function main() {
+   //TODO: test each block type as beginning/end of line/file for each one
+   var test_lex_str1 = "\"hello ;world\";test\n f #|yo|#"; //one string, 1 1-line comment, 1 multi-line
+   var test_lex_str2 = "\"\"\"\" ;\n\n #||##|\n|#"; //2 strings, 2 1-line comments, 2 multi-line comments
+   var test_lex_str3 = "\"h#| |#ello ;\"blah;test\nf#|y;o|#"; //1 string, 1 1-line, 1 multi-line
+   var test_lex_str4 = "\"h#| |#ello ;\"\"world\";test\nf#|y;\no|#"; //
+
+   console.log(_lex_get_block_ranges(test_lex_str3))
+}
+main();

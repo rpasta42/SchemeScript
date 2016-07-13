@@ -15,13 +15,13 @@
 ;(comp-file "ir.scm")
 ;(comp-file "scm_lib.scm")
 ;(comp-file "/home/kkostya/fun/rust/skomakare/examples/racing.lo")
-
+(comp-file "ir.scm")
 ;(define newl "\n")
 ;(repl-js)
 
 
-(define newl "\n")
+;(define newl "\n")
 ;(comp-jshtml "misc/test.ss")
 ;(comp-jshtml "misc/efcart.ss")
-(comp-jshtml "misc/tetlisp.ss")
+;(comp-jshtml "misc/tetlisp.ss")
 ;(comp-jshtml "misc/example_kittens_btns_moving.ss")

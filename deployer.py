@@ -31,7 +31,8 @@ def on_event(arg):
 #watch_mask = pyinotify.ALL_EVENTS
 watch_mask = pyinotify.IN_CREATE | pyinotify.IN_MODIFY
 #exclude_filter=not_py_file (this can be used to exclude .git directory)
-wm.add_watch(path, watch_mask, proc_fun=on_event, rec=True, auto_add=True, quiet=False)
+wm.add_watch(path, watch_mask, proc_fun=on_event,
+            rec=True, auto_add=True, quiet=False)
 
 notifier.loop()
 
