@@ -4,7 +4,13 @@
 ;(define newl "")
 ;(repl-iter)
 
-;(define newl "\n")
+(define newl "\n")
+;server code
+;(comp-file "misc/efcart/serv.ss")
+;client
+;(comp-file "misc/efcart/efcart.ss")
+
+(display newl)
 ;(comp-file "misc.test/cc")
 ;(comp-file "ir.scm")
 ;(comp-file "scm_lib.scm")
@@ -15,4 +21,7 @@
 
 
 (define newl "\n")
-(comp-jshtml "misc/test.ss")
+;(comp-jshtml "misc/test.ss")
+;(comp-jshtml "misc/efcart.ss")
+(comp-jshtml "misc/tetlisp.ss")
+;(comp-jshtml "misc/example_kittens_btns_moving.ss")

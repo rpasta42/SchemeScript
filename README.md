@@ -1,6 +1,10 @@
 ## WARNING: THIS PROJECT IS IN VERY EARLY STAGE OF DEVELOPMENT
 # SchemeScript
 
+#node test
+guile main.scm >misc/efcart/test.tmp.js
+
+
 left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
 
 guile main.scm >/root/nginx-html/test1.html
@@ -41,6 +45,7 @@ Features:
 - [x] Addition and subtraction
 
 High priority TODO's:
+- [ ] main.scm should accept different argument types
 - [ ] better REPL for UI
 - [ ] if and cond statements
 - [ ] efficient recursion or iteration mechanism
@@ -66,4 +71,36 @@ Other unsupported things and TODO's:
 - [ ] Division and multiplication
 - [ ] Efficient Javascript generation
 - [ ] cons, list, car, cdr
+
+Flatris:
+
+cos(90) = 0
+sin(90) = 1
+x' = x*cosT + y*sinT
+y' = -x*sinT + y*cosT
+x' = y
+y' = -x
+
+TODO:
+   on of squares in shape-stable < 0, alert("you lost")
+
+width: 10
+height: 20
+
+xx
+ xx
+
+xx
+xx
+
+xxxx
+
+ x
+xxx
+
+x
+xxx
+
+  x
+xxx
 
