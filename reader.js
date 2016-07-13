@@ -1,4 +1,15 @@
 
+var SS_STR = 'ss_str';
+var SS_NUM = 'ss_num';
+var SS_SYM = 'ss_sym';
+
+
+function ss_mk_type(type) {
+   var v = {};
+   v.ss_type = type;
+
+}
+
 function conf() {
    //( ) { } [ ] ' , "
 
@@ -88,6 +99,10 @@ function _lex_get_block_ranges(str) {
       line_start = line_end;
    }
 
+   if (cmnt_start != null) {
+      return
+   }
+
    return blk_ranges;
 }
 
@@ -98,7 +113,7 @@ function lex(str) {
 function parse(lexemes) {
 }
 
-function main() {
+function test_lex_get_block_ranges() {
    //TODO: test each block type as beginning/end of line/file for each one
    var test_lex_str1 = "\"hello ;world\";test\n f #|yo|#"; //one string, 1 1-line comment, 1 multi-line
    var test_lex_str2 = "\"\"\"\" ;\n\n #||##|\n|#"; //2 strings, 2 1-line comments, 2 multi-line comments
@@ -107,4 +122,10 @@ function main() {
 
    console.log(_lex_get_block_ranges(test_lex_str3))
 }
+
+function main() {
+   test_lex_get_block_ranges();
+
+}
+
 main();

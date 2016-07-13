@@ -3,7 +3,6 @@
 
 /* TO IMPLEMENT:
 not
-
 string=?
 number?
 string?
@@ -93,7 +92,7 @@ write text to file
 function symbol_kkqm_(exp) { //symbol?
    if (typeof exp === 'object' &&
        exp['ss_type'] != undefined &&
-       exp['ss_type'] == 'sym') {
+       exp['ss_type'] == 'ss_sym') {
 
    }
 }
