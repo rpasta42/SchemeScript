@@ -437,11 +437,12 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
 
    while (i <= end) {
       var is_child_start = c_it < child_ranges.length && child_ranges[c_it].start == i;
-      var child = child_ranges[c_it];
-      var c_start = child.start;
-      var c_end = child.end;
 
       if (is_child_start) {
+         var child = child_ranges[c_it];
+         var c_start = child.start;
+         var c_end = child.end;
+
          if (!child['atom?']) {
             c_start += 1; c_end -= 1;
          }
@@ -479,7 +480,7 @@ function parse(lexemes) {
       return child_ranges_ret;
    var child_ranges = ss_get_val(child_ranges_ret);
 
-   var ret = ss_mk_var(SS_NIL); //[];
+   var ret = []; //ss_mk_var(SS_NIL);
 
    for (var child_i in child_ranges) {
       var child_range = child_ranges[child_i];
@@ -497,10 +498,11 @@ function parse(lexemes) {
       if (ss_is_type(parsed_child_ret, SS_ERR))
          return parsed_child_ret;
 
-      ret = cons(ss_get_val(parsed_child_ret), ret);
+      ret.push(parsed_child_ret); //ss_get_val(parsed_child_ret));
+      //ret = cons(ss_get_val(parsed_child_ret), ret);
    }
-
-   ret = arr_to_lst(lst_to_arr(ret).reverse());
+   ret = ss_mk_var(SS_ARR, ret);
+   //ret = arr_to_lst(lst_to_arr(ret).reverse());
    return ret; //ss_mk_var(SS_CON, ret);
 }
 
@@ -564,15 +566,20 @@ function test_parse_ranges() {
 function test_parse() {
    var test_parse_str1 = '(+ (- 3 5) 15)';
    var test_parse_str2 = '(+ 3)';
-   var test_parse_str3 = '\',(+ 3)';
+   var test_parse_str3 = '\',(+ 3)'; //TODO!!!
+   var test_parse_str4 = "'(+ 3 5)";
+   var test_parse_str5 = "(+ 3 5) (- 2 1)";
+   var test_parse_str6 = "(define (f x y) (+ y 5 (* x x)))";
 
-   var to_parse = test_parse_str1;
+   var to_parse = test_parse_str6;
    var lexed_opt = lex(to_parse);
    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
    var lexed = ss_get_val(lexed_opt);
 
    var parsed = parse(lexed);
-   print_exp(parsed);
+   //print_exp(parsed);
+   //print_exp_raw(parsed);
+   print_exp_raw(parsed['value'][0]);
 }
 
 //END PARSER STUFF
