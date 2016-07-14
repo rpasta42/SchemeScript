@@ -81,7 +81,7 @@ function _lex_get_block_ranges(str) {
 
    for (var lineNum in lines) {
       var line = lines[lineNum];
-      var line_end = line_start + line.length;
+      var line_end = line_start + line.length + 1;
 
       for (var i = 0; i < line.length; i++) {
          var c = line[i];
@@ -113,11 +113,11 @@ function _lex_get_block_ranges(str) {
             }
          }
          else if (c == '#' && str_start == null) {
-            if (cmnt_start == null) {
+            if (cmnt_start == null) { //if no multiline comment
                multi_first_char = true;
                continue;
             }
-            else if (multi_first_char) {
+            else if (multi_first_char) { //if multi already began
                blk_ranges.push(mk_blk('#|', cmnt_start, real_i));
                cmnt_start = null;
             }
@@ -220,7 +220,7 @@ function lex(str) {
                block_lexeme = make_lexeme(SS_LEX_STR, slice);
             break;
             case '#|':
-               var slice = str.slice(block.start+2, block.end-2+1+1);
+               var slice = str.slice(block.start+2, block.end-2+1); //block.end-2+1+1
                block_lexeme = make_lexeme(SS_LEX_BC, slice);
             break;
             case ';':
@@ -232,8 +232,8 @@ function lex(str) {
          if (block_lexeme == null)
             return ss_mk_err(SS_ERR_UnknownLexBlock, block.start, block.end);
          lexemes.push(add_lex_range(block_lexeme, block.start, block.end));
-         i = block.end + 1; //TODO: maybe continue
-         if (block.type == '#|') i += 1; //TODO: why does this work?
+         i = block.end //+ 1; //TODO: maybe continue
+         //if (block.type == '#|') i += 1; //TODO: why does this work?
          br_it += 1; //next block range
       }
       if (str[i] != undefined) {
@@ -251,9 +251,10 @@ function lex(str) {
 
             lexemes.push(make_lexeme_range(lex_type, null, i, i));
          }
-         else if (c == '"' || /*c == '#' ||*/ c == ';') //gets triggered for stuff like """"
-            i -= 1; //TODO: why do we have to do this?
+         /*else if (c == '"' || c == '#' || c == ';') //gets triggered for stuff like """"
+            i -= 1; //TODO: why do we have to do this?*/
          //else if (c == '#')
+         else if (c == '"' || c == '#' || c == ';') ;
          else if (c == ' ') ; //skip
          else {
             if (col.length == 0) {
@@ -284,8 +285,11 @@ function test_lex_get_block_ranges() {
    var test_str2 = "\"\"\"\" ;\n\n #||##|\n|#"; //2 strings, 2 1-line comments, 2 multi-line comments
    var test_str3 = "\"h#| |#ello ;\"blah;test\nf#|y;o|#"; //1 string, 1 1-line, 1 multi-line
    var test_str4 = "\"h#| |#ello ;\"\"world\";test\nf#|y;\no|#"; //
+   var test_str5 = "#|ha|##|ho|#";
+   var test_str6 = 'yo "hi"';
+   var test_str6 = 'yo #| ha\nblah|#';
 
-   console.log(_lex_get_block_ranges(test_str3));
+   console.log(_lex_get_block_ranges(test_str4));
 }
 
 function print_lex_result(lex_res) {
@@ -316,8 +320,10 @@ function test_lex() {
    var test_lex_str11 = '#|ha|##|ba|#';
    var test_lex_str12 = '#|ha|#';
 
+
+   //console.log(_lex_get_block_ranges(test_lex_str11));
    //console.log(lex(test_lex_str1));
-   print_lex_result(lex(test_lex_str12));
+   print_lex_result(lex(test_lex_str10));
 }
 
 function parse(lexemes) {}
