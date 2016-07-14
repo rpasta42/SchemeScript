@@ -233,6 +233,7 @@ function lex(str) {
             return ss_mk_err(SS_ERR_UnknownLexBlock, block.start, block.end);
          lexemes.push(add_lex_range(block_lexeme, block.start, block.end));
          i = block.end + 1; //TODO: maybe continue
+         if (block.type == '#|') i += 1; //TODO: why does this work?
          br_it += 1; //next block range
       }
       if (str[i] != undefined) {
@@ -252,6 +253,7 @@ function lex(str) {
          }
          else if (c == '"' || /*c == '#' ||*/ c == ';') //gets triggered for stuff like """"
             i -= 1; //TODO: why do we have to do this?
+         //else if (c == '#')
          else if (c == ' ') ; //skip
          else {
             if (col.length == 0) {
@@ -275,8 +277,6 @@ function lex(str) {
    }
    return ss_mk_var(SS_ARR, lexemes);
 }
-
-function parse(lexemes) {}
 
 function test_lex_get_block_ranges() {
    //TODO: test each block type as beginning/end of line/file for each one
@@ -309,13 +309,18 @@ function test_lex() {
    var test_lex_str4 = '(()h   )';
    var test_lex_str5 = 'ha"blah"';
    var test_lex_str6 = '"fa"';
-   var test_lex_str6 = '"fa" "';
-   var test_lex_str7 = '(+ 3 5)) ;world haha"\n4.5';
-   var test_lex_str8 = '(+ 3 5)) #|;world haha"\n4.5|#3.5';
+   var test_lex_str7 = 'lo"la"ba "ha"';
+   var test_lex_str8 = '"fa" "'; //"Unterminated Quote"
+   var test_lex_str9 = '(+ 3 5)) ;world haha"\n4.5';
+   var test_lex_str10 = '(+ 3 5)) #|;world haha"\n4.5|#3.5';
+   var test_lex_str11 = '#|ha|##|ba|#';
+   var test_lex_str12 = '#|ha|#';
 
    //console.log(lex(test_lex_str1));
-   print_lex_result(lex(test_lex_str8));
+   print_lex_result(lex(test_lex_str12));
 }
+
+function parse(lexemes) {}
 
 function main() {
    //test_lex_get_block_ranges();
