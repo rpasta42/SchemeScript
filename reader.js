@@ -1,3 +1,6 @@
+var scomp = require('./selfcomp.js');
+cons = scomp.cons;
+
 function ss_get_val(x) { //TODO: check for other stuff like pair
    if (x.ss_type != undefined && x.ss_type != SS_ERR)
       return x.value;
@@ -25,15 +28,21 @@ function ss_is_type(val, t) {
 }
 
 //Error types
+var SS_ERR_NoStartParen = "Missing Open Parenthesis";
+var SS_ERR_BadLexeme = "Bad Lexeme";
+var SS_ERR_NoEndParen = "Missing Close Parenthesis";
 var SS_ERR_UnterminatedComment = "Unterminated Comment"; //-42;
 var SS_ERR_UnterminatedQuote = "Unterminated Quote"; //-41;
 var SS_ERR_MisformedNum = "Misformed Number"; //-40;
 var SS_ERR_UnknownLexBlock = "Unknown Lexeme Block"; //-39;
+var SS_ERR_UncompleteExp = "Uncomplete Expression";
 
 //variable types
 var SS_LEX = 'ss_lex';
 var SS_STR = 'ss_str';
-var SS_NUM = 'ss_num';
+//var SS_NUM = 'ss_num';
+var SS_INT = 'ss_int';
+var SS_FLT = 'ss_flt'; //float
 var SS_SYM = 'ss_sym';
 var SS_NIL = 'ss_nil';
 //var SS_FUN = 'ss_fun';
@@ -41,6 +50,9 @@ var SS_ERR = 'ss_err';
 //var SS_LST = 'ss_lst';
 var SS_ARR = 'ss_arr';
 var SS_CON = 'ss_con';
+var SS_Q   = 'ss_\'';  // '
+var SS_QQ  = 'ss_`';   // ` (quasiquote/backquote)
+var SS_CMA = 'ss_,';   // , (comma)
 
 /*function conf() {
    //( ) { } [ ] ' , "
@@ -180,6 +192,7 @@ function collect_sym(col) {
    return make_lexeme(SS_LEX_SYM, col);
 }
 
+//err or array
 function lex(str) {
    console.log('lexing str: ' + str);
    var lexemes = [];
@@ -296,7 +309,7 @@ function test_lex_get_block_ranges() {
    console.log(_lex_get_block_ranges(test_str4));
 }
 
-function print_lex_result(lex_res) {
+function _print_lex_result(lex_res) {
    if (ss_is_type(lex_res, SS_ERR))
       console.log("bad lex() (" + lex_res.start + ", " +
                   lex_res.end + "): " + lex_res.code);
@@ -327,28 +340,195 @@ function test_lex() {
 
    //console.log(_lex_get_block_ranges(test_lex_str11));
    //console.log(lex(test_lex_str1));
-   print_lex_result(lex(test_lex_str7));
+   _print_lex_result(lex(test_lex_str7));
 }
 
 //END LEXER STUFF
 
-//SCHEME STUFF
-
-//END SCHEME STUFF
-
 //PARSER STUFF
-function parse(lexemes) {
 
+function lexer_quote_to_exp(q) {
+   if (q == SS_LEX_Q) return SS_Q;
+   if (q == SS_LEX_QQ) return SS_QQ;
+   if (q == SS_LEX_CMA) return SS_CMA;
+   return null;
+}
+
+//returns err or dict {start:range_start, end:range_end, quotes:q, atom?:is_atom}
+function _parser_get_child_ranges(lexemes, start, end) {
+   function make_range(start, end, quotes, is_atom) {
+      return { 'start': start, 'end': end, 'quotes': quotes, 'atom?': is_atom };
+   }
+
+   var nestedness = 0;
+   var child_ranges = [];
+   var quotes = [];
+   var child_start = null;
+   var i = start;
+
+   while (i <= end) {
+      var l_data = lexemes[i]; //l_data.start, l_data.end, l_data.lexeme
+      var lexeme = l_data.lexeme.value;
+      //console.log(lexeme);
+
+      if (lexeme.type == SS_LEX_O_P) {
+         nestedness += 1;
+         if (nestedness == 1) child_start = i;
+      }
+      else if (lexeme.type == SS_LEX_C_P) {
+         nestedness -= 1;
+         if (nestedness == 0) {
+            child_ranges.push(make_range(child_start, i, quotes, false));
+            quotes = [];
+            child_start = null;
+         }
+         else if (nestedness < 0)
+            return ss_mk_err(SS_ERR_NoStartParen, end, end);
+      }
+      else if (contains([SS_LEX_Q, SS_LEX_QQ, SS_LEX_CMA], lexeme.type)) {
+         if (nestedness == 0) quotes.push(lexeme.type);
+      }
+      else if (nestedness == 0) {
+         child_ranges.push(make_range(i, i, quotes, true));
+         quotes = [];
+      }
+      i++;
+   }
+
+   if (nestedness > 0)
+      return ss_mk_err(SS_ERR_NoEndParen, child_start, end);
+   return ss_mk_var(SS_ARR, child_ranges);
+}
+
+function _parse_lexeme(lex) {
+   var l = lex.lexeme.value;
+   //console.log('parsing lexeme: ' + JSON.stringify(l));
+   if (l.type == SS_LEX_STR) return ss_mk_var(SS_STR, l.value);
+   if (l.type == SS_LEX_SYM) return ss_mk_var(SS_SYM, l.value);
+   if (l.type == SS_LEX_INT) return ss_mk_var(SS_INT, l.value);
+   if (l.type == SS_LEX_FLT) return ss_mk_var(SS_FLT, l.value);
+   return null;
+}
+
+function _parse_helper(lexemes, start, end, quotes, is_atom) {
+   if (is_atom) {
+      let exp = _parse_lexeme(lexemes[start]);
+      if (exp == null)
+         return ss_mk_err(SS_ERR_BadLexeme, start, end);
+      for (var i in quotes) { //TODO: reverse quotes???
+         exp = ss_mk_var(lexer_quote_to_exp(quotes[i]), exp);
+      }
+      return exp;
+   }
+
+   var sub = [];
+
+   var child_ranges_ret = _parser_get_child_ranges(lexemes, start, end);
+   if (ss_is_type(child_ranges_ret, SS_ERR))
+      return child_ranges_ret;
+   var child_ranges = ss_get_val(child_ranges_ret);
+
+   var c_it = 0; //current child range
+   var i = start;
+
+   while (i <= end) {
+      var is_child_start = c_it < child_ranges.length && child_ranges[c_it].start == i;
+      var child = child_ranges[c_it];
+      var c_start = child.start;
+      var c_end = child.end;
+
+      if (is_child_start) {
+         if (!child['atom?']) {
+            c_start += 1; c_end -= 1;
+         }
+         var parsed_child_ret = _parse_helper(lexemes, c_start, c_end,
+                                             child.quotes, child['atom?']);
+         if (ss_is_type(parsed_child_ret, SS_ERR))
+            return parsed_child_ret;
+         //sub.push(ss_get_val(parsed_child_ret));
+         sub = cons(ss_get_val(parsed_child_ret), sub); //TODO: reverse?
+
+         c_it += 1;
+         i = c_end + 1;
+         continue;
+      }
+      i += 1;
+   }
+
+   var ret = ss_mk_var(SS_ARR, sub);
+   for (var i = 0; i < quotes.length; i++) //TODO: reverse quotes?
+      ret = ss_mk_var(lexer_quote_to_exp(quotes[i]), ret);
+   return ret;
+}
+
+function parse(lexemes) {
+   if (lexemes.length == 0)
+      return ss_mk_err(SS_ERR_UncompleteExp, 0, 0);
+
+   var child_ranges_ret = _parser_get_child_ranges(lexemes, 0, lexemes.length-1);
+   //print_child_range_res(child_ranges_ret);
+
+   if (ss_is_type(child_ranges_ret, SS_ERR))
+      return child_ranges_ret;
+   var child_ranges = ss_get_val(child_ranges_ret);
+
+   var ret = ss_mk_var(SS_NIL); //[];
+
+   for (var child_i in child_ranges) {
+      var child_range = child_ranges[child_i];
+      var start = child_range.start;
+      var end = child_range.end;
+      var quotes = child_range.quotes;
+      var is_atom = child_range['atom?'];
+
+      if (!is_atom) {
+         start += 1;
+         end -= 1;
+      }
+
+      var parsed_child_ret = _parse_helper(lexemes, start, end, quotes, is_atom);
+      if (ss_is_type(parsed_child_ret, SS_ERR))
+         return parsed_child_ret;
+
+      ret = cons(ss_get_val(parsed_child_ret), ret);
+   }
+
+   return ret; //ss_mk_var(SS_CON, ret);
+}
+
+function print_child_range_res(range_res) {
+   if (ss_is_type(range_res, SS_ERR)) {
+      console.log("bad get_child_ranges(): (" + range_res.start + ', ' +
+                  range_res.end + '): ' + range_res.code);
+      return;
+   }
+
+   var child_ranges = ss_get_val(range_res);
+   for (var i in child_ranges) {
+      var cran = child_ranges[i];
+      console.log('start: ' + cran.start + ', end: ' + cran.end +
+                  ', atom?: ' + cran['atom?'] + ' \nquotes: ' +
+                  JSON.stringify(cran.quotes));
+   }
 }
 
 function print_exp(e) {
-
+   if (ss_is_type(e, SS_ERR)) {
+      console.log("bad parse(): (" + e.start + ', ' +
+                  e.end + '): ' + e.code);
+      return;
+   }
+   console.log(JSON.stringify(e));
 }
 
-function test_parse() {
-   var test_parse_str1 = '(+ 3 5)';
+function test_parse_ranges() {
+   //uncomment print_child_range_res(child_ranges_ret); in parse()
+   var test_parse_str1 = '(+ (- 3 5) 15)';
+   var test_parse_str2 = '(+ (- 3 5) 15'; //Missing Close Parenthesis
+   var test_parse_str3 = '+ (- 3 5) 15)'; //Missing Open Parenthesis
+   var test_parse_str4 = '+ (- 3 5) 15'; //atom 0-0, nonatom 1-5, atom 6-6
 
-   var to_parse = test_parse_str1;
+   var to_parse = test_parse_str4;
    var lexed_opt = lex(to_parse);
    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
    var lexed = ss_get_val(lexed_opt);
@@ -356,6 +536,20 @@ function test_parse() {
    var parsed = parse(lexed);
    print_exp(parsed);
 }
+
+function test_parse() {
+   var test_parse_str1 = '(+ (- 3 5) 15)';
+   var test_parse_str2 = '(+ 3)';
+
+   var to_parse = test_parse_str2;
+   var lexed_opt = lex(to_parse);
+   if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+   var lexed = ss_get_val(lexed_opt);
+
+   var parsed = parse(lexed);
+   print_exp(parsed);
+}
+
 //END PARSER STUFF
 
 function main() {
@@ -416,3 +610,5 @@ function contains(arr, needle) {
    return false;
 }
 
+exports.ss_mk_var = ss_mk_var;
+exports.SS_CON = SS_CON;

@@ -1,5 +1,15 @@
 
-
+var reader = require('./reader.js');
+function ss_mk_var(type, val) {
+   var v = {};
+   v.ss_type = type;
+   if (val != undefined)
+      v.value = val;
+   return v;
+}
+//var ss_mk_var = reader.ss_mk_var;
+//var SS_CON = reader.SS_CON;
+var SS_CON = 'ss_con';
 
 /* TO IMPLEMENT:
 not
@@ -120,7 +130,13 @@ function list_kkqm_(exp) { //list?
    }
    return false;
 }
-
-function to_string(exp) {
-
+function null_kkqm_(exp) { //null?
+   return ss_is_type(exp, SS_NIL);
 }
+
+function to_string(exp) {}
+
+exports.cons = cons;
+exports.car = car;
+exports.cdr = cdr;
+
