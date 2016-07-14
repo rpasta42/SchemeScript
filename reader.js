@@ -24,10 +24,10 @@ function ss_is_type(val, t) {
 }
 
 //Error types
-var SS_ERR_UnterminatedComment = -42;
-var SS_ERR_UnterminatedQuote = -41;
-var SS_ERR_MisformedNum = -40;
-var SS_ERR_UnknownLexBlock = -39;
+var SS_ERR_UnterminatedComment = "Unterminated Comment"; //-42;
+var SS_ERR_UnterminatedQuote = "Unterminated Quote"; //-41;
+var SS_ERR_MisformedNum = "Misformed Number"; //-40;
+var SS_ERR_UnknownLexBlock = "Unknown Lexeme Block"; //-39;
 
 //variable types
 var SS_LEX = 'ss_lex';
@@ -77,7 +77,6 @@ function _lex_get_block_ranges(str) {
 
    //index in str where current line starts (which is length of previous line)
    var line_start = 0;
-   console.log('kk str: ' + str);
    var lines = str.split('\n');
 
    for (var lineNum in lines) {
@@ -131,9 +130,9 @@ function _lex_get_block_ranges(str) {
    }
 
    if (cmnt_start != null)
-      return ss_mk_err(SS_ERR_UnterminatedComment, cmnt_start, code.length - 1);
+      return ss_mk_err(SS_ERR_UnterminatedComment, cmnt_start, str.length - 1);
    if (str_start != null)
-      return ss_mk_err(SS_ERR_UnterminatedQuote, str_start, code.length - 1);
+      return ss_mk_err(SS_ERR_UnterminatedQuote, str_start, str.length - 1);
    return ss_mk_var(SS_ARR, blk_ranges);
 }
 
@@ -157,7 +156,9 @@ var SS_LEX_CMA = 'ss_lex_,';   // , (comma)
 var SS_LEX_SC  = 'ss_lex_sc';  // ; (simple comment that spawns until end of line)
 var SS_LEX_BC  = 'ss_lex_bc';  // #| and |# (block comment)
 
-function make_lexeme(type, val) { return ss_mk_var(SS_LEX, val); }
+function make_lexeme(type, val) {
+   return ss_mk_var(SS_LEX, {'type':type, 'value':val});
+}
 function make_lexeme_range(type, val, start, end) {
    return {'lexeme': make_lexeme(type, val), 'start': start, 'end': end};
 }
@@ -176,6 +177,7 @@ function collect_sym(col) {
 }
 
 function lex(str) {
+   console.log('lexing str: ' + str);
    var lexemes = [];
    var col = ''; //symbol collector
 
@@ -214,15 +216,15 @@ function lex(str) {
 
          switch (block.type) { //'str' or ';' or '#|'
             case 'str':
-               var slice = str.slice(block.start+1, block.end-1);
+               var slice = str.slice(block.start+1, block.end-1+1);
                block_lexeme = make_lexeme(SS_LEX_STR, slice);
             break;
             case '#|':
-               var slice = str.slice(block.start+2, block.end-2);
+               var slice = str.slice(block.start+2, block.end-2+1+1);
                block_lexeme = make_lexeme(SS_LEX_BC, slice);
             break;
             case ';':
-               var slice = str.slice(block.start+1, block.end-1);
+               var slice = str.slice(block.start+1, block.end-1+1);
                block_lexeme = make_lexeme(SS_LEX_SC, slice);
             break;
          }
@@ -248,7 +250,7 @@ function lex(str) {
 
             lexemes.push(make_lexeme_range(lex_type, null, i, i));
          }
-         else if (c == '"' || c == '#' || c == ';') //gets triggered for stuff like """"
+         else if (c == '"' || /*c == '#' ||*/ c == ';') //gets triggered for stuff like """"
             i -= 1; //TODO: why do we have to do this?
          else if (c == ' ') ; //skip
          else {
@@ -295,21 +297,28 @@ function print_lex_result(lex_res) {
    for (var i in lexemes) {
       var lexeme = lexemes[i];
       console.log('start: ' + lexeme.start + ' end: ' + lexeme.end +
-                  ' data: ' + lexeme.lexeme.value); //JSON.stringify(lexeme.lexeme));
+                  ' data: ' + JSON.stringify(lexeme.lexeme.value));
    }
 }
 
 function test_lex() {
    //TODO: test last part of string with bad number like "(hi 34a"
    var test_lex_str1 = "(+ 3 5)";
+   var test_lex_str2 = "32ff"; //should get "Misformed Number"
+   var test_lex_str3 = '(+ "yo" ho ho)';
+   var test_lex_str4 = '(()h   )';
+   var test_lex_str5 = 'ha"blah"';
+   var test_lex_str6 = '"fa"';
+   var test_lex_str6 = '"fa" "';
+   var test_lex_str7 = '(+ 3 5)) ;world haha"\n4.5';
+   var test_lex_str8 = '(+ 3 5)) #|;world haha"\n4.5|#3.5';
 
    //console.log(lex(test_lex_str1));
-   print_lex_result(lex(test_lex_str1));
+   print_lex_result(lex(test_lex_str8));
 }
 
 function main() {
    //test_lex_get_block_ranges();
-   console.log('main being called');
    test_lex();
 }
 
