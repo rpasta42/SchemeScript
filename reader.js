@@ -415,6 +415,7 @@ function _parse_lexeme(lex) {
 }
 
 function _parse_helper(lexemes, start, end, quotes, is_atom) {
+   var quotes = quotes.reverse();
    if (is_atom) {
       let exp = _parse_lexeme(lexemes[start]);
       if (exp == null)
@@ -450,7 +451,7 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
                                              child.quotes, child['atom?']);
          if (ss_is_type(parsed_child_ret, SS_ERR))
             return parsed_child_ret;
-         sub.push(ss_get_val(parsed_child_ret));
+         sub.push(parsed_child_ret); //kk remove tags //ss_get_val(parsed_child_ret));
          //kk removeme //sub = cons(ss_get_val(parsed_child_ret), sub); //TODO: reverse?
 
          c_it += 1;
@@ -464,7 +465,9 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
    //var ret = arr_to_lst(lst_to_arr(sub).reverse());
    var ret = ss_mk_var(SS_ARR, sub);
 
-   for (var i = quotes.length-1; i > 0; i--) //TODO: reverse quotes?
+   /*for (var i = quotes.length-1; i > 0; i--) //TODO: reverse quotes?
+      ret = ss_mk_var(lexer_quote_to_exp(quotes[i]), ret);*/
+   for (var i = 0; i < quotes.length; i++) //TODO: reverse quotes?
       ret = ss_mk_var(lexer_quote_to_exp(quotes[i]), ret);
    return ret;
 }
@@ -531,20 +534,47 @@ function print_exp_raw(e) {
    console.log(JSON.stringify(e));
 }
 
-function print_exp(e) {
+
+function print_exp(e, tab) {
+   if (tab == undefined)
+      tab = 0;
+   var t = make_tabs(tab);
+
    if (ss_is_type(e, SS_ERR)) {
-      console.log("bad parse(): (" + e.start + ', ' +
+      console.log(t + "bad parse(): (" + e.start + ', ' +
                   e.end + '): ' + e.code);
       return;
    }
-   else if (ss_is_type(e, SS_STR))
-      console.log('str: "' + ss_get_val(e) + '"');
-   else if (ss_is_type(e, SS_CON)) {
+   var v = ss_get_val(e);
+
+   if (ss_is_type(e, SS_STR))
+      console.log(t + 'str: "' + v + '"');
+   /*else if (ss_is_type(e, SS_CON)) {
       console.log('sub: ');
       cons_map(e, print_exp_raw);
+   }*/
+   else if (ss_is_type(e, SS_Q)) { //SS_QQ, SS_CMA
+      console.log(t + 'quote: \' {default}');
+      print_exp(v, tab + 1);
+   }
+   else if (ss_is_type(e, SS_QQ)) {
+      console.log(t + 'quote: ` {quasiquote}');
+      print_exp(v, tab + 1);
+   }
+   else if (ss_is_type(e, SS_CMA)) {
+      console.log(t + 'quote: , {comma}');
+      print_exp(v, tab + 1);
+   }
+   else if (ss_is_type(e, SS_INT))
+      console.log(t + 'int: ' + v);
+   else if (ss_is_type(e, SS_SYM))
+      console.log(t + 'sym: ' + v);
+   else if (ss_is_type(e, SS_ARR)) {
+      console.log(t + 'sub: ');
+      ss_get_val(e).map(function (x) { print_exp(x, tab+1); });
    }
    else
-      console.log("other type: " + JSON.stringify(e));
+      console.log(t + "other type: " + JSON.stringify(e));
 }
 
 function test_parse_ranges() {
@@ -566,12 +596,14 @@ function test_parse_ranges() {
 function test_parse() {
    var test_parse_str1 = '(+ (- 3 5) 15)';
    var test_parse_str2 = '(+ 3)';
-   var test_parse_str3 = '\',(+ 3)'; //TODO!!!
+   var test_parse_str3 = "',`(+ ',3)"; //TODO!!!
    var test_parse_str4 = "'(+ 3 5)";
    var test_parse_str5 = "(+ 3 5) (- 2 1)";
    var test_parse_str6 = "(define (f x y) (+ y 5 (* x x)))";
+   var test_parse_str7 = "(blah 't '(+ 3 5))";
+   var test_parse_str8 = "'yo";
 
-   var to_parse = test_parse_str6;
+   var to_parse = test_parse_str3;
    var lexed_opt = lex(to_parse);
    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
    var lexed = ss_get_val(lexed_opt);
@@ -579,7 +611,9 @@ function test_parse() {
    var parsed = parse(lexed);
    //print_exp(parsed);
    //print_exp_raw(parsed);
-   print_exp_raw(parsed['value'][0]);
+   //print_exp_raw(parsed['value'][0]);
+   //print_exp(parsed['value'][0]);
+   print_exp(parsed);
 }
 
 //END PARSER STUFF
@@ -604,6 +638,13 @@ function is_float(x) {
 function is_number_like(str) { return str.length > 0 && !isNaN(str[0]); } //TODO
 function is_numeric(str) { return !isNaN(str); } //TODO
 function to_num(str) { return parseFloat(str); } //TODO
+function repeat_str(s, n) {
+   var ret = '';
+   while (n-- > 0)
+      ret += s;
+   return ret;
+}
+function make_tabs(n) { return repeat_str('   ', n); }
 
 //TODO: broken, removeme
 //http://stackoverflow.com/questions/1181575/determine-whether-an-array-contains-a-value
