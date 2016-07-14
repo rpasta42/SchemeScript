@@ -425,7 +425,7 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
       return exp;
    }
 
-   var sub = ss_mk_var(SS_NIL); //[];
+   var sub = []; //kk removeme //ss_mk_var(SS_NIL); //[];
 
    var child_ranges_ret = _parser_get_child_ranges(lexemes, start, end);
    if (ss_is_type(child_ranges_ret, SS_ERR))
@@ -449,8 +449,8 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
                                              child.quotes, child['atom?']);
          if (ss_is_type(parsed_child_ret, SS_ERR))
             return parsed_child_ret;
-         //sub.push(ss_get_val(parsed_child_ret));
-         sub = cons(ss_get_val(parsed_child_ret), sub); //TODO: reverse?
+         sub.push(ss_get_val(parsed_child_ret));
+         //kk removeme //sub = cons(ss_get_val(parsed_child_ret), sub); //TODO: reverse?
 
          c_it += 1;
          i = c_end + 1;
@@ -459,7 +459,10 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
       i += 1;
    }
 
-   var ret = arr_to_lst(lst_to_arr(sub).reverse()); //ss_mk_var(SS_ARR, sub);
+   //kk removeme
+   //var ret = arr_to_lst(lst_to_arr(sub).reverse());
+   var ret = ss_mk_var(SS_ARR, sub);
+
    for (var i = quotes.length-1; i > 0; i--) //TODO: reverse quotes?
       ret = ss_mk_var(lexer_quote_to_exp(quotes[i]), ret);
    return ret;
