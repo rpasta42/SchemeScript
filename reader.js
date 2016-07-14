@@ -40,7 +40,7 @@ var SS_LST = 'ss_lst';
 var SS_ARR = 'ss_arr';
 var SS_CON = 'ss_con';
 
-function conf() {
+/*function conf() {
    //( ) { } [ ] ' , "
 
    //o_paren, c_paren, o_square_br, c_square_br
@@ -49,7 +49,7 @@ function conf() {
    return this;
 }
 
-var c = conf();
+var c = conf();*/
 
 //internal lexer function
 //Block is a lexeme type which stores parts of
@@ -77,6 +77,7 @@ function _lex_get_block_ranges(str) {
 
    //index in str where current line starts (which is length of previous line)
    var line_start = 0;
+   console.log('kk str: ' + str);
    var lines = str.split('\n');
 
    for (var lineNum in lines) {
@@ -145,6 +146,8 @@ var SS_LEX_O_P = 'ss_lex_o_p'; // (
 var SS_LEX_C_P = 'ss_lex_c_p'; // )
 var SS_LEX_O_S = 'ss_lex_o_s'; // [
 var SS_LEX_C_S = 'ss_lex_c_s'; // ] close square
+var SS_LEX_O_C = 'ss_lex_o_c'; // { open curly
+var SS_LEX_C_C = 'ss_lex_c_c'; // } close curvy
 /*var SS_LEX_Q   = 'ss_lex_q'; // '
 var SS_LEX_QQ  = 'ss_lex_qq';  // ` (quasiquote/backquote)
 var SS_LEX_CMA = 'ss_lex_cma'; // , (comma)*/
@@ -177,7 +180,7 @@ function lex(str) {
    var col = ''; //symbol collector
 
    //range of comments/string blocks
-   var block_ranges_ret = _get_block_ranges(str);
+   var block_ranges_ret = _lex_get_block_ranges(str);
    if (ss_is_type(block_ranges_ret, SS_ERR)) return block_ranges_ret;
 
    var block_ranges = ss_get_val(block_ranges_ret);
@@ -190,7 +193,7 @@ function lex(str) {
 
       //block != null if haven't looped through all blocks, and i is beginning of block
       var block = br_it < block_ranges.length ? block_ranges[br_it] : null;
-      block = (block.start == i) ? block : null;
+      block = (block != null && block.start == i) ? block : null;
 
       //if current char c is string or special char, then push previously collected
       var c = str[i];
@@ -232,37 +235,82 @@ function lex(str) {
       }
       if (str[i] != undefined) {
          c = str[i];
-         if (contains([',', '`', '\'', '(', ')', '[', ']', '{', '}'], c
-         if (c == ',' || c == '`' || c == '\'') {
-            //let q = make_lexeme('ss_lex_' + c, null);
-            //lexemes.push(add_lex_range(q, i, i));
-            lexemes.push(make_lexeme_range('ss_lex_' + c, null, i, i));
+         if (contains([',', '`', '\'', '(', ')', '[', ']', '{', '}'], c)) {
+            var lex_type = null;
+
+            if (c == ',' || c == '`' || c == '\'') lex_type = 'ss_lex_' + c;
+            else if (c == '(') lex_type = SS_LEX_O_P;
+            else if (c == ')') lex_type = SS_LEX_C_P;
+            else if (c == '[') lex_type = SS_LEX_O_S;
+            else if (c == ']') lex_type = SS_LEX_C_S;
+            else if (c == '{') lex_type = SS_LEX_O_C;
+            else if (c == '}') lex_type = SS_LEX_C_C;
+
+            lexemes.push(make_lexeme_range(lex_type, null, i, i));
          }
-         else if (c == '(')
-            lexemes.push(make_lexeme_range(SS_LEX_O_P, null, i, i));
-         else if (c == ')')
-            lexemes.push(make_lexeme_range(SS_LEX_C_P, null, i, i));
-         else if (c == '[')
+         else if (c == '"' || c == '#' || c == ';') //gets triggered for stuff like """"
+            i -= 1; //TODO: why do we have to do this?
+         else if (c == ' ') ; //skip
+         else {
+            if (col.length == 0) {
+               collect_start = i;
+               collect_end = i;
+            }
+            else collect_end = i;
+            //col.push(c);
+            col += c;
+         }
       }
+      i += 1;
    }
+
+   if (col.length > 0) {
+      var l = collect_sym(col);
+      if (l != null)
+         lexemes.push(add_lex_range(l, collect_start, collect_end));
+      else //TODO: test last part of string with misformed number
+         return ss_mk_err(SS_ERR_MisformedNum, collect_start, collect_end);
+   }
+   return ss_mk_var(SS_ARR, lexemes);
 }
 
-function parse(lexemes) {
-}
+function parse(lexemes) {}
 
 function test_lex_get_block_ranges() {
    //TODO: test each block type as beginning/end of line/file for each one
-   var test_lex_str1 = "\"hello ;world\";test\n f #|yo|#"; //one string, 1 1-line comment, 1 multi-line
-   var test_lex_str2 = "\"\"\"\" ;\n\n #||##|\n|#"; //2 strings, 2 1-line comments, 2 multi-line comments
-   var test_lex_str3 = "\"h#| |#ello ;\"blah;test\nf#|y;o|#"; //1 string, 1 1-line, 1 multi-line
-   var test_lex_str4 = "\"h#| |#ello ;\"\"world\";test\nf#|y;\no|#"; //
+   var test_str1 = "\"hello ;world\";test\n f #|yo|#"; //one string, 1 1-line comment, 1 multi-line
+   var test_str2 = "\"\"\"\" ;\n\n #||##|\n|#"; //2 strings, 2 1-line comments, 2 multi-line comments
+   var test_str3 = "\"h#| |#ello ;\"blah;test\nf#|y;o|#"; //1 string, 1 1-line, 1 multi-line
+   var test_str4 = "\"h#| |#ello ;\"\"world\";test\nf#|y;\no|#"; //
 
-   console.log(_lex_get_block_ranges(test_lex_str3))
+   console.log(_lex_get_block_ranges(test_str3));
+}
+
+function print_lex_result(lex_res) {
+   if (ss_is_type(lex_res, SS_ERR))
+      console.log("bad lex() (" + lex_res.start + ", " +
+                  lex_res.end + "): " + lex_res.code);
+   var lexemes = ss_get_val(lex_res);
+
+   for (var i in lexemes) {
+      var lexeme = lexemes[i];
+      console.log('start: ' + lexeme.start + ' end: ' + lexeme.end +
+                  ' data: ' + lexeme.lexeme.value); //JSON.stringify(lexeme.lexeme));
+   }
+}
+
+function test_lex() {
+   //TODO: test last part of string with bad number like "(hi 34a"
+   var test_lex_str1 = "(+ 3 5)";
+
+   //console.log(lex(test_lex_str1));
+   print_lex_result(lex(test_lex_str1));
 }
 
 function main() {
-   test_lex_get_block_ranges();
-
+   //test_lex_get_block_ranges();
+   console.log('main being called');
+   test_lex();
 }
 
 main();
@@ -280,6 +328,7 @@ function is_number_like(str) { return str.length > 0 && !isNaN(str[0]); } //TODO
 function is_numeric(str) { return !isNaN(str); } //TODO
 function to_num(str) { return parseFloat(str); } //TODO
 
+//TODO: broken, removeme
 //http://stackoverflow.com/questions/1181575/determine-whether-an-array-contains-a-value
 var _contains = function(needle) {
    // Per spec, the way to identify NaN is that it is not equal to itself
@@ -308,6 +357,11 @@ var _contains = function(needle) {
    return indexOf.call(this, needle) > -1;
 };
 function contains(arr, needle) {
-   return _contains.call(arr, needle);
+   //return _contains.call(arr, needle);
+   //$.inArray(arr, needle);
+   for (var i in arr) {
+      if (arr[i] == needle) return true;
+   }
+   return false;
 }
 
