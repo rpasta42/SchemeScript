@@ -7,9 +7,22 @@ function ss_mk_var(type, val) {
       v.value = val;
    return v;
 }
+function ss_is_type(val, t) {
+   if (typeof val === 'object' && val.ss_type != undefined) {
+      return val.ss_type == t;
+   }
+   return null;
+}
+function ss_get_val(x) { //TODO: check for other stuff like pair
+   if (x.ss_type != undefined && x.ss_type != SS_ERR)
+      return x.value;
+   return null;
+}
 //var ss_mk_var = reader.ss_mk_var;
 //var SS_CON = reader.SS_CON;
+var SS_ERR = 'ss_err';
 var SS_CON = 'ss_con';
+var SS_NIL = 'ss_nil';
 
 /* TO IMPLEMENT:
 not
@@ -93,6 +106,35 @@ write text to file
 function cons(a, b) {
    return ss_mk_var(SS_CON, [a, b]);
 }
+
+function arr_to_lst(arr) {
+   var ret = ss_mk_var(SS_NIL);
+
+   for (var i in arr) {
+      ret = cons(arr[i], ret);
+   }
+   return ret;
+}
+function lst_to_arr(lst) {
+   var ret = [];
+   while (ss_is_type(lst, SS_CON)) {
+      ret.push(car(lst));
+      lst = cdr(lst);
+   }
+   return ret;
+}
+
+/*function reverse_list(lst) {
+   if (ss_is_type(lst, SS_NIL))
+      return SS_NIL;
+}*/
+
+function cons_map(exp, f) { //map
+   if (ss_is_type(exp, SS_CON))
+      cons(f(car(exp)), cons_map(cdr(exp), f));
+   return ss_mk_var(SS_NIL);
+}
+
 function car(lst) {
    if (ss_is_type(lst, SS_CON))
       return ss_get_val(lst)[0];
@@ -121,7 +163,7 @@ function pair_kkqm_(exp) { //pair? //TODO: what about SS_ARR?
 }
 function list_kkqm_(exp) { //list?
    if (ss_is_type(exp, SS_CON)) {
-      var val = ss_get_val(exp);
+      var val = exp; //ss_get_val(exp);
       while (ss_is_type(val, SS_CON))
          val = cdr(val);
       if (ss_is_type(val, SS_NIL))
@@ -139,4 +181,6 @@ function to_string(exp) {}
 exports.cons = cons;
 exports.car = car;
 exports.cdr = cdr;
-
+exports.cons_map = cons_map;
+exports.arr_to_lst = arr_to_lst;
+exports.lst_to_arr = lst_to_arr;

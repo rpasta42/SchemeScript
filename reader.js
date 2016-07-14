@@ -1,5 +1,9 @@
 var scomp = require('./selfcomp.js');
 cons = scomp.cons;
+cdr = scomp.cdr;
+arr_to_lst = scomp.arr_to_lst;
+lst_to_arr = scomp.lst_to_arr;
+cons_map = scomp.cons_map;
 
 function ss_get_val(x) { //TODO: check for other stuff like pair
    if (x.ss_type != undefined && x.ss_type != SS_ERR)
@@ -421,7 +425,7 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
       return exp;
    }
 
-   var sub = [];
+   var sub = ss_mk_var(SS_NIL); //[];
 
    var child_ranges_ret = _parser_get_child_ranges(lexemes, start, end);
    if (ss_is_type(child_ranges_ret, SS_ERR))
@@ -455,8 +459,8 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
       i += 1;
    }
 
-   var ret = ss_mk_var(SS_ARR, sub);
-   for (var i = 0; i < quotes.length; i++) //TODO: reverse quotes?
+   var ret = arr_to_lst(lst_to_arr(sub).reverse()); //ss_mk_var(SS_ARR, sub);
+   for (var i = quotes.length-1; i > 0; i--) //TODO: reverse quotes?
       ret = ss_mk_var(lexer_quote_to_exp(quotes[i]), ret);
    return ret;
 }
@@ -493,6 +497,7 @@ function parse(lexemes) {
       ret = cons(ss_get_val(parsed_child_ret), ret);
    }
 
+   ret = arr_to_lst(lst_to_arr(ret).reverse());
    return ret; //ss_mk_var(SS_CON, ret);
 }
 
@@ -512,13 +517,29 @@ function print_child_range_res(range_res) {
    }
 }
 
-function print_exp(e) {
+function print_exp_raw(e) {
    if (ss_is_type(e, SS_ERR)) {
       console.log("bad parse(): (" + e.start + ', ' +
                   e.end + '): ' + e.code);
       return;
    }
    console.log(JSON.stringify(e));
+}
+
+function print_exp(e) {
+   if (ss_is_type(e, SS_ERR)) {
+      console.log("bad parse(): (" + e.start + ', ' +
+                  e.end + '): ' + e.code);
+      return;
+   }
+   else if (ss_is_type(e, SS_STR))
+      console.log('str: "' + ss_get_val(e) + '"');
+   else if (ss_is_type(e, SS_CON)) {
+      console.log('sub: ');
+      cons_map(e, print_exp_raw);
+   }
+   else
+      console.log("other type: " + JSON.stringify(e));
 }
 
 function test_parse_ranges() {
@@ -534,14 +555,15 @@ function test_parse_ranges() {
    var lexed = ss_get_val(lexed_opt);
 
    var parsed = parse(lexed);
-   print_exp(parsed);
+   print_exp_raw(parsed);
 }
 
 function test_parse() {
    var test_parse_str1 = '(+ (- 3 5) 15)';
    var test_parse_str2 = '(+ 3)';
+   var test_parse_str3 = '\',(+ 3)';
 
-   var to_parse = test_parse_str2;
+   var to_parse = test_parse_str1;
    var lexed_opt = lex(to_parse);
    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
    var lexed = ss_get_val(lexed_opt);
