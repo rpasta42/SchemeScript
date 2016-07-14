@@ -3,6 +3,8 @@
 
 /* TO IMPLEMENT:
 not
+procedure?
+   http://stackoverflow.com/questions/9597548/how-to-check-if-a-symbol-is-a-procedure-or-not
 string=?
 number?
 string?
@@ -36,12 +38,11 @@ not
 (eval "")
 (read)
 
-
 guile/scheme std:
 write text to file
-(call-with-output-file "b.txt"
-   (lambda (output-port)
-      (display "hello, world" output-port)))
+   (call-with-output-file "b.txt"
+      (lambda (output-port)
+         (display "hello, world" output-port)))
 
 (define (stdin-read)
    ;(define ret "")

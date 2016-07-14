@@ -2,3 +2,4 @@
 *~
 pwkg
 node_modules
+*.scm.js
