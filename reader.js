@@ -203,7 +203,7 @@ function lex(str) {
          if (lexeme == null)
             return ss_mk_err(SS_ERR_MisformedNum, collect_start, collect_end);
          else
-            lexemes.push(add_lex_range(lexeme, collect_start, collect_end)); //{'lexeme': lexeme, 'start': collect_start, 'end': collect_end});
+            lexemes.push(add_lex_range(lexeme, collect_start, collect_end));
          col = '';
       }
       if (block != null) { //push strings and comments if we have any
@@ -226,18 +226,23 @@ function lex(str) {
 
          if (block_lexeme == null)
             return ss_mk_err(SS_ERR_UnknownLexBlock, block.start, block.end);
-         lexemes.push({'lexeme':block_lexeme, 'start': block.start, 'end': block.end});
+         lexemes.push(add_lex_range(block_lexeme, block.start, block.end));
          i = block.end + 1; //TODO: maybe continue
          br_it += 1; //next block range
       }
       if (str[i] != undefined) {
+         c = str[i];
+         if (contains([',', '`', '\'', '(', ')', '[', ']', '{', '}'], c
          if (c == ',' || c == '`' || c == '\'') {
-            let q = make_lexeme('ss_lex_' + c, null);
-            lexemes.push({'lexeme':q, 'start': i, 'end': i});
+            //let q = make_lexeme('ss_lex_' + c, null);
+            //lexemes.push(add_lex_range(q, i, i));
+            lexemes.push(make_lexeme_range('ss_lex_' + c, null, i, i));
          }
-         else if (c == '(') {
-            lexemes.
-         }
+         else if (c == '(')
+            lexemes.push(make_lexeme_range(SS_LEX_O_P, null, i, i));
+         else if (c == ')')
+            lexemes.push(make_lexeme_range(SS_LEX_C_P, null, i, i));
+         else if (c == '[')
       }
    }
 }
