@@ -21,6 +21,7 @@ function ss_is_type(val, t) {
    if (typeof val === 'object' && val.ss_type != undefined) {
       return val.ss_type == t;
    }
+   return null;
 }
 
 //Error types
@@ -34,9 +35,10 @@ var SS_LEX = 'ss_lex';
 var SS_STR = 'ss_str';
 var SS_NUM = 'ss_num';
 var SS_SYM = 'ss_sym';
-var SS_FUN = 'ss_fun';
+var SS_NIL = 'ss_nil';
+//var SS_FUN = 'ss_fun';
 var SS_ERR = 'ss_err';
-var SS_LST = 'ss_lst';
+//var SS_LST = 'ss_lst';
 var SS_ARR = 'ss_arr';
 var SS_CON = 'ss_con';
 
@@ -50,6 +52,8 @@ var SS_CON = 'ss_con';
 }
 
 var c = conf();*/
+
+//LEXER STUFF
 
 //internal lexer function
 //Block is a lexeme type which stores parts of
@@ -224,7 +228,7 @@ function lex(str) {
                block_lexeme = make_lexeme(SS_LEX_BC, slice);
             break;
             case ';':
-               var slice = str.slice(block.start+1, block.end-1+1);
+               var slice = str.slice(block.start+1, block.end-1); //block.end-1+1
                block_lexeme = make_lexeme(SS_LEX_SC, slice);
             break;
          }
@@ -313,24 +317,51 @@ function test_lex() {
    var test_lex_str4 = '(()h   )';
    var test_lex_str5 = 'ha"blah"';
    var test_lex_str6 = '"fa"';
-   var test_lex_str7 = 'lo"la"ba "ha"';
-   var test_lex_str8 = '"fa" "'; //"Unterminated Quote"
-   var test_lex_str9 = '(+ 3 5)) ;world haha"\n4.5';
-   var test_lex_str10 = '(+ 3 5)) #|;world haha"\n4.5|#3.5';
-   var test_lex_str11 = '#|ha|##|ba|#';
-   var test_lex_str12 = '#|ha|#';
-
+   var test_lex_str7 = '"ba""ga"';
+   var test_lex_str8 = 'lo"la"ba "ha"';
+   var test_lex_str9 = '"fa" "'; //"Unterminated Quote"
+   var test_lex_str10 = '(+ 3 5)) ;world haha"\n4.5';
+   var test_lex_str11 = '(+ 3 5)) #|;world haha"\n4.5|#3.5';
+   var test_lex_str12 = '#|ha|##|ba|#';
+   var test_lex_str13 = '#|ha|#';
 
    //console.log(_lex_get_block_ranges(test_lex_str11));
    //console.log(lex(test_lex_str1));
-   print_lex_result(lex(test_lex_str10));
+   print_lex_result(lex(test_lex_str7));
 }
 
-function parse(lexemes) {}
+//END LEXER STUFF
+
+//SCHEME STUFF
+
+//END SCHEME STUFF
+
+//PARSER STUFF
+function parse(lexemes) {
+
+}
+
+function print_exp(e) {
+
+}
+
+function test_parse() {
+   var test_parse_str1 = '(+ 3 5)';
+
+   var to_parse = test_parse_str1;
+   var lexed_opt = lex(to_parse);
+   if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+   var lexed = ss_get_val(lexed_opt);
+
+   var parsed = parse(lexed);
+   print_exp(parsed);
+}
+//END PARSER STUFF
 
 function main() {
    //test_lex_get_block_ranges();
-   test_lex();
+   //test_lex();
+   test_parse();
 }
 
 main();
