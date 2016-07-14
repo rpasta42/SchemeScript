@@ -23,9 +23,14 @@ function ss_is_type(val, t) {
    }
 }
 
+//Error types
 var SS_ERR_UnterminatedComment = -42;
 var SS_ERR_UnterminatedQuote = -41;
+var SS_ERR_MisformedNum = -40;
+var SS_ERR_UnknownLexBlock = -39;
+
 //variable types
+var SS_LEX = 'ss_lex';
 var SS_STR = 'ss_str';
 var SS_NUM = 'ss_num';
 var SS_SYM = 'ss_sym';
@@ -39,8 +44,8 @@ function conf() {
    //( ) { } [ ] ' , "
 
    //o_paren, c_paren, o_square_br, c_square_br
-   var lexemeTypes = ['sym', 'num', 'str', 'paren', 'quote', 'comment'];
-   this.lexemeTypes = lexemeTypes;
+   //var lexemeTypes = ['sym', 'num', 'str', 'paren', 'quote', 'comment'];
+   //this.lexemeTypes = lexemeTypes;
    return this;
 }
 
@@ -131,17 +136,40 @@ function _lex_get_block_ranges(str) {
    return ss_mk_var(SS_ARR, blk_ranges);
 }
 
-
+//Lexeme types
 var SS_LEX_STR = 'ss_lex_str';
-var SS_LEX_NUM = 'ss_lex_num';
+var SS_LEX_INT = 'ss_lex_int';
+var SS_LEX_FLT = 'ss_lex_flt'; //float
 var SS_LEX_SYM = 'ss_lex_sym';
-var SS_LEX_OP
-function make_lexeme(type, val) {
+var SS_LEX_O_P = 'ss_lex_o_p'; // (
+var SS_LEX_C_P = 'ss_lex_c_p'; // )
+var SS_LEX_O_S = 'ss_lex_o_s'; // [
+var SS_LEX_C_S = 'ss_lex_c_s'; // ] close square
+/*var SS_LEX_Q   = 'ss_lex_q'; // '
+var SS_LEX_QQ  = 'ss_lex_qq';  // ` (quasiquote/backquote)
+var SS_LEX_CMA = 'ss_lex_cma'; // , (comma)*/
+var SS_LEX_Q   = 'ss_lex_\'';  // '
+var SS_LEX_QQ  = 'ss_lex_`';   // ` (quasiquote/backquote)
+var SS_LEX_CMA = 'ss_lex_,';   // , (comma)
+var SS_LEX_SC  = 'ss_lex_sc';  // ; (simple comment that spawns until end of line)
+var SS_LEX_BC  = 'ss_lex_bc';  // #| and |# (block comment)
 
+function make_lexeme(type, val) { return ss_mk_var(SS_LEX, val); }
+function make_lexeme_range(type, val, start, end) {
+   return {'lexeme': make_lexeme(type, val), 'start': start, 'end': end};
+}
+function add_lex_range(lex, start, end) {
+   return {'lexeme': lex, 'start': start, 'end': end};
 }
 
 function collect_sym(col) {
    if (is_int(col))
+      return make_lexeme(SS_LEX_INT, parseInt(col));
+   if (is_float(col))
+      return make_lexeme(SS_LEX_FLT, parseFloat(col));
+   if (is_number_like(col)) // 2dsfsd 4dsf is not allowed
+      return null;
+   return make_lexeme(SS_LEX_SYM, col);
 }
 
 function lex(str) {
@@ -169,9 +197,47 @@ function lex(str) {
       var special_chars = [' ', '(', ')', '\'', '`', ',', '[', ']', '{', '}'];
       var is_c_special = (block != null) || contains(special_chars, c);
 
-      if (is_special && !(col.length == 0)) { //push numberes and symbols
-         //TODO: kk leftoff if
+      //current is special, so push previously collected numberes and symbols
+      if (is_c_special && !(col.length == 0)) {
+         var lexeme = collect_sym(col);
+         if (lexeme == null)
+            return ss_mk_err(SS_ERR_MisformedNum, collect_start, collect_end);
+         else
+            lexemes.push(add_lex_range(lexeme, collect_start, collect_end)); //{'lexeme': lexeme, 'start': collect_start, 'end': collect_end});
+         col = '';
+      }
+      if (block != null) { //push strings and comments if we have any
+         var block_lexeme = null;
 
+         switch (block.type) { //'str' or ';' or '#|'
+            case 'str':
+               var slice = str.slice(block.start+1, block.end-1);
+               block_lexeme = make_lexeme(SS_LEX_STR, slice);
+            break;
+            case '#|':
+               var slice = str.slice(block.start+2, block.end-2);
+               block_lexeme = make_lexeme(SS_LEX_BC, slice);
+            break;
+            case ';':
+               var slice = str.slice(block.start+1, block.end-1);
+               block_lexeme = make_lexeme(SS_LEX_SC, slice);
+            break;
+         }
+
+         if (block_lexeme == null)
+            return ss_mk_err(SS_ERR_UnknownLexBlock, block.start, block.end);
+         lexemes.push({'lexeme':block_lexeme, 'start': block.start, 'end': block.end});
+         i = block.end + 1; //TODO: maybe continue
+         br_it += 1; //next block range
+      }
+      if (str[i] != undefined) {
+         if (c == ',' || c == '`' || c == '\'') {
+            let q = make_lexeme('ss_lex_' + c, null);
+            lexemes.push({'lexeme':q, 'start': i, 'end': i});
+         }
+         else if (c == '(') {
+            lexemes.
+         }
       }
    }
 }
@@ -196,9 +262,16 @@ function main() {
 
 main();
 
-function is_int(str) { return is_numeric(str) && str.indexOf('.') == -1; }
-function is_float(str) { return is_numeric(str) && str.indexOf('.') != -1; }
-function is_number_like(str) { return !isNaN(str[0]); } //TODO
+//MISC Generic Helper Utilities
+function is_int(x) {
+   var str = x.toString();
+   return is_numeric(str) && str.indexOf('.') == -1;
+}
+function is_float(x) {
+   var str = x.toString();
+   return is_numeric(str) && str.indexOf('.') != -1;
+}
+function is_number_like(str) { return str.length > 0 && !isNaN(str[0]); } //TODO
 function is_numeric(str) { return !isNaN(str); } //TODO
 function to_num(str) { return parseFloat(str); } //TODO
 
