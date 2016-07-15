@@ -5,6 +5,16 @@ arr_to_lst = scomp.arr_to_lst;
 lst_to_arr = scomp.lst_to_arr;
 cons_map = scomp.cons_map;
 
+/*function conf() {
+   //( ) { } [ ] ' , "
+
+   //o_paren, c_paren, o_square_br, c_square_br
+   //var lexemeTypes = ['sym', 'num', 'str', 'paren', 'quote', 'comment'];
+   //this.lexemeTypes = lexemeTypes;
+   return this;
+}
+
+var c = conf();*/
 function ss_get_val(x) { //TODO: check for other stuff like pair
    if (x.ss_type != undefined && x.ss_type != SS_ERR)
       return x.value;
@@ -17,8 +27,9 @@ function ss_mk_var(type, val) {
       v.value = val;
    return v;
 }
-function ss_mk_err(code, start, end) {
-   var err = ss_mk_var(SS_ERR);
+function ss_mk_err(code, stage, start, end) {
+   var err = ss_mk_var(SS_ERR); //look at Error types
+   err.stage = stage; //lex/parse
    err.code = code;
    err.start = start;
    err.end = end;
@@ -57,17 +68,6 @@ var SS_CON = 'ss_con';
 var SS_Q   = 'ss_\'';  // '
 var SS_QQ  = 'ss_`';   // ` (quasiquote/backquote)
 var SS_CMA = 'ss_,';   // , (comma)
-
-/*function conf() {
-   //( ) { } [ ] ' , "
-
-   //o_paren, c_paren, o_square_br, c_square_br
-   //var lexemeTypes = ['sym', 'num', 'str', 'paren', 'quote', 'comment'];
-   //this.lexemeTypes = lexemeTypes;
-   return this;
-}
-
-var c = conf();*/
 
 //LEXER STUFF
 
@@ -150,9 +150,9 @@ function _lex_get_block_ranges(str) {
    }
 
    if (cmnt_start != null)
-      return ss_mk_err(SS_ERR_UnterminatedComment, cmnt_start, str.length - 1);
+      return ss_mk_err(SS_ERR_UnterminatedComment, 'lex', cmnt_start, str.length - 1);
    if (str_start != null)
-      return ss_mk_err(SS_ERR_UnterminatedQuote, str_start, str.length - 1);
+      return ss_mk_err(SS_ERR_UnterminatedQuote, 'lex', str_start, str.length - 1);
    return ss_mk_var(SS_ARR, blk_ranges);
 }
 
@@ -198,7 +198,7 @@ function collect_sym(col) {
 
 //err or array
 function lex(str) {
-   console.log('lexing str: ' + str);
+   console.log('lexing str'); //: ' + str);
    var lexemes = [];
    var col = ''; //symbol collector
 
@@ -227,7 +227,7 @@ function lex(str) {
       if (is_c_special && !(col.length == 0)) {
          var lexeme = collect_sym(col);
          if (lexeme == null)
-            return ss_mk_err(SS_ERR_MisformedNum, collect_start, collect_end);
+            return ss_mk_err(SS_ERR_MisformedNum, 'lex', collect_start, collect_end);
          else
             lexemes.push(add_lex_range(lexeme, collect_start, collect_end));
          col = '';
@@ -251,7 +251,7 @@ function lex(str) {
          }
 
          if (block_lexeme == null)
-            return ss_mk_err(SS_ERR_UnknownLexBlock, block.start, block.end);
+            return ss_mk_err(SS_ERR_UnknownLexBlock, 'lex', block.start, block.end);
          lexemes.push(add_lex_range(block_lexeme, block.start, block.end));
          i = block.end //+ 1; //TODO: maybe continue
          //if (block.type == '#|') i += 1; //TODO: why does this work?
@@ -295,7 +295,7 @@ function lex(str) {
       if (l != null)
          lexemes.push(add_lex_range(l, collect_start, collect_end));
       else //TODO: test last part of string with misformed number
-         return ss_mk_err(SS_ERR_MisformedNum, collect_start, collect_end);
+         return ss_mk_err(SS_ERR_MisformedNum, 'lex', collect_start, collect_end);
    }
    return ss_mk_var(SS_ARR, lexemes);
 }
@@ -351,6 +351,7 @@ function test_lex() {
 
 //PARSER STUFF
 
+//parser itself (no testing code)
 function lexer_quote_to_exp(q) {
    if (q == SS_LEX_Q) return SS_Q;
    if (q == SS_LEX_QQ) return SS_QQ;
@@ -387,7 +388,7 @@ function _parser_get_child_ranges(lexemes, start, end) {
             child_start = null;
          }
          else if (nestedness < 0)
-            return ss_mk_err(SS_ERR_NoStartParen, end, end);
+            return ss_mk_err(SS_ERR_NoStartParen, 'parse', end, end);
       }
       else if (contains([SS_LEX_Q, SS_LEX_QQ, SS_LEX_CMA], lexeme.type)) {
          if (nestedness == 0) quotes.push(lexeme.type);
@@ -400,7 +401,7 @@ function _parser_get_child_ranges(lexemes, start, end) {
    }
 
    if (nestedness > 0)
-      return ss_mk_err(SS_ERR_NoEndParen, child_start, end);
+      return ss_mk_err(SS_ERR_NoEndParen, 'parse', child_start, end);
    return ss_mk_var(SS_ARR, child_ranges);
 }
 
@@ -419,7 +420,7 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
    if (is_atom) {
       let exp = _parse_lexeme(lexemes[start]);
       if (exp == null)
-         return ss_mk_err(SS_ERR_BadLexeme, start, end);
+         return ss_mk_err(SS_ERR_BadLexeme, 'parse', start, end);
       for (var i in quotes) { //TODO: reverse quotes???
          exp = ss_mk_var(lexer_quote_to_exp(quotes[i]), exp);
       }
@@ -474,7 +475,7 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
 
 function parse(lexemes) {
    if (lexemes.length == 0)
-      return ss_mk_err(SS_ERR_UncompleteExp, 0, 0);
+      return ss_mk_err(SS_ERR_UncompleteExp, 'parse', 0, 0);
 
    var child_ranges_ret = _parser_get_child_ranges(lexemes, 0, lexemes.length-1);
    //print_child_range_res(child_ranges_ret);
@@ -534,47 +535,151 @@ function print_exp_raw(e) {
    console.log(JSON.stringify(e));
 }
 
+var s = require('./sprintf.js').sprintf;
 
-function print_exp(e, tab) {
-   if (tab == undefined)
-      tab = 0;
-   var t = make_tabs(tab);
+function badResultPrint(debug_info, err, tab_chars) {
+   /*console.log(tab_chars + "bad parse(): (" + err.start + ', ' +
+               err.end + '): ' + err.code);
+   var x = s("%ibad parse(): (%i, %i): %s",
+             tab_chars, err.start, err.end, err.code));*/
+   var err_while_err_str = 'error while displaying error: ';
+   var char_i_start = null, char_i_end = null;
 
-   if (ss_is_type(e, SS_ERR)) {
-      console.log(t + "bad parse(): (" + e.start + ', ' +
-                  e.end + '): ' + e.code);
+   if (!('origin_src' in debug_info)) {
+      console.log(err_while_err_str + 'no source code origin');
       return;
    }
-   var v = ss_get_val(e);
 
-   if (ss_is_type(e, SS_STR))
-      console.log(t + 'str: "' + v + '"');
-   /*else if (ss_is_type(e, SS_CON)) {
+   if (err.stage == 'lex') {
+      char_i_start = err.start;
+      char_i_end = err.end;
+   }
+   else if (err.stage == 'parse') {
+      //need to convert lexeme index into char index for display
+      if (!('lexeme_indices' in debug_info)) {
+         console.log(err_while_err_str + 'parse error but no lexeme indices');
+         return;
+      }
+      var lexemes = debug_info.lexeme_indices;
+      var lex_start = lexemes[err.start];
+      var lex_end = lexemes[err.end];
+      char_i_start = lex_start.start;
+      char_i_end = lex_end.end;
+   }
+   else {
+      s('%s unknown stage: (err: %s debug_info: %s)',
+        err_while_err_str, String(err), String(debug_info));
+   }
+
+   if (!char_i_start || !char_i_end) {
+      console.log(err_while_err_str + 'no character index for the error');
+      return;
+   }
+
+   var origin = debug_info.origin_src;
+   var lines = origin.split('\n');
+
+   var start_line = null;
+   var end_line = null;
+   var start_char_in_line = null;
+   var end_char_in_line = null;
+
+   var curr_char_in_line = 0;
+   var curr_line = 0;
+   for (var i = 0; i < origin.length; i++) {
+      var c = origin[i];
+      if (c == '\n') {
+         curr_line++;
+         curr_char_in_line = 0;
+      }
+      if (i == char_i_start) {
+         start_line = curr_line;
+         start_char_in_line = curr_char_in_line;
+      }
+      if (i == char_i_end) {
+         end_line = curr_line;
+         end_char_in_line = curr_char_in_line;
+      }
+      curr_char_in_line++;
+   }
+
+   if (contains([start_line, end_line, start_char_in_line, end_char_in_line], null)) {
+      console.log('error figuring out line stuff');
+      return;
+   }
+
+   var err_str = s("%serror while %sing(): (%i, %i): %s\n",
+                   tab_chars, err.stage, err.start, err.end, err.code);
+
+   err_str += s('%sline:char (%i:%i, %i:%i)\n',
+                tab_chars, start_line, start_char_in_line, end_line, end_char_in_line);
+
+   for (var i = start_line; i <= end_line; i++) {
+      err_str += '\n' + lines[i] + '\n';
+
+      for (var j in lines[i]) {
+         var print = true;
+
+         if (i == start_line && j < start_char_in_line)
+            print = false;
+         if (i == end_line && j > end_char_in_line)
+            print = false;
+
+         if (print)
+            err_str += '^';
+         else
+            err_str += ' ';
+      }
+   }
+   console.log(err_str);
+}
+
+/*debug_info = {
+   'origin_src' : . //input source code (for lexer and parser)
+   'lexeme_indices' : ., //array of lexemes with indices in source code (generated by lexer, used by parser) (look at add_lex_range)
+}*/
+//print_exp(lexed_opt/parsed_opt, SS_ERR, 'lex', code);
+function print_exp_tree(debug_info, exp_opt, num_tabs) {
+   if (num_tabs == undefined)
+      num_tabs = 0;
+   var tab_chars = make_tab_chars(num_tabs);
+
+   if (ss_is_type(exp_opt, SS_ERR)) {
+      badResultPrint(debug_info, exp_opt, tab_chars);
+      return;
+   }
+
+   var exp_val = ss_get_val(exp_opt);
+   if (ss_is_type(exp_opt, SS_STR))
+      console.log(tab_chars + 'str: "' + exp_val + '"');
+   /*else if (ss_is_type(exp, SS_CON)) {
       console.log('sub: ');
-      cons_map(e, print_exp_raw);
+      cons_map(e, print_exp_tree_raw);
    }*/
-   else if (ss_is_type(e, SS_Q)) { //SS_QQ, SS_CMA
-      console.log(t + 'quote: \' {default}');
-      print_exp(v, tab + 1);
+   else if (ss_is_type(exp_opt, SS_Q)) { //SS_QQ, SS_CMA
+      console.log(tab_chars + 'quote: \' {default}');
+      print_exp_tree(debug_info, exp_val, num_tabs + 1);
    }
-   else if (ss_is_type(e, SS_QQ)) {
-      console.log(t + 'quote: ` {quasiquote}');
-      print_exp(v, tab + 1);
+   else if (ss_is_type(exp_opt, SS_QQ)) {
+      console.log(tab_chars + 'quote: ` {quasiquote}');
+      print_exp_tree(debug_info, exp_val, num_tabs + 1);
    }
-   else if (ss_is_type(e, SS_CMA)) {
-      console.log(t + 'quote: , {comma}');
-      print_exp(v, tab + 1);
+   else if (ss_is_type(exp_opt, SS_CMA)) {
+      console.log(tab_chars + 'quote: , {comma}');
+      print_exp_tree(debug_info, exp_val, num_tabs + 1);
    }
-   else if (ss_is_type(e, SS_INT))
-      console.log(t + 'int: ' + v);
-   else if (ss_is_type(e, SS_SYM))
-      console.log(t + 'sym: ' + v);
-   else if (ss_is_type(e, SS_ARR)) {
-      console.log(t + 'sub: ');
-      ss_get_val(e).map(function (x) { print_exp(x, tab+1); });
+   else if (ss_is_type(exp_opt, SS_INT))
+      console.log(tab_chars + 'int: ' + exp_val);
+   else if (ss_is_type(exp_opt, SS_SYM))
+      console.log(tab_chars + 'sym: ' + exp_val);
+   else if (ss_is_type(exp_opt, SS_ARR)) {
+      console.log(tab_chars + 'sub: ');
+      ss_get_val(exp_val).map(function (x) {
+         print_exp_tree(debug_info, x, num_tabs+1);
+      });
    }
    else
-      console.log(t + "other type: " + JSON.stringify(e));
+      console.log(num_tabs + "other type: " + JSON.stringify(exp_opt));
 }
 
 function test_parse_ranges() {
@@ -586,7 +691,8 @@ function test_parse_ranges() {
 
    var to_parse = test_parse_str4;
    var lexed_opt = lex(to_parse);
-   if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+   if (ss_is_type(lexed_opt, SS_ERR)) //return lexed_opt;
+      console.log("lexing test error");
    var lexed = ss_get_val(lexed_opt);
 
    var parsed = parse(lexed);
@@ -603,43 +709,64 @@ function test_parse() {
    var test_parse_str7 = "(blah 't '(+ 3 5))";
    var test_parse_str8 = "'yo";
    var test_parse_str9 = "((define x (+ 3 5)) (define (f x y) (- 3 10) (+ x y 4 2)))";
-   var test_parse_str10 = "#|"; //lex err
-   var test_parse_str11 = "\""; //lex err
+   var test_parse_str10 = "#|"; //lex err "Unterminated Comment"
+   var test_parse_str11 = "\""; //lex err "Unterminated Quote"
+   var test_parse_str12 = "|#"; //TODO!!
+   var test_parse_str13 = ")";
 
-   var to_parse = test_parse_str11;
+   var to_parse = test_parse_str1;
    var lexed_opt = lex(to_parse);
    if (ss_is_type(lexed_opt, SS_ERR)) {
-      print_exp(lexed_opt); //return lexed_opt;
+      print_exp_tree(debug_info, lexed_opt); //return lexed_opt;
       return;
    }
    var lexed = ss_get_val(lexed_opt);
 
    var parsed = parse(lexed);
-   //print_exp(parsed);
-   //print_exp_raw(parsed);
-   //print_exp_raw(parsed['value'][0]);
-   //print_exp(parsed['value'][0]);
-   print_exp(parsed);
+   //print_exp_tree(parsed);
+   //print_exp_tree_raw(parsed);
+   //print_exp_tree_raw(parsed['value'][0]);
+   //print_exp_tree(parsed['value'][0]);
+   print_exp_tree(parsed);
 }
 
 //END PARSER STUFF
-function test_ir_comp() {
-   var lexed_opt = lex(to_parse);
-    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+
+function test_scm_parser(fpath) {
+   console.log('parsing ' + fpath);
+   var fs = require('fs');
+
+   var code = fs.readFileSync(fpath, {encoding:'utf8', flags:'r'});
+   console.log(code);
+
+   var lexed_opt = lex(code);
+    if (ss_is_type(lexed_opt, SS_ERR)) {
+      var debug_info = {
+         'origin_src' : code,
+         'lexeme_indices' : null
+      }
+      print_exp_tree(debug_info, lexed_opt, 1);
+      return;
+   }
    var lexed = ss_get_val(lexed_opt);
    var parsed = parse(lexed);
-   //print_exp(parsed);
-   //print_exp_raw(parsed);
-   //print_exp_raw(parsed['value'][0]);
-   //print_exp(parsed['value'][0]);
-   print_exp(parsed);
+   //print_exp_tree(parsed);
+   //print_exp_tree_raw(parsed);
+   //print_exp_tree_raw(parsed['value'][0]);
+   //print_exp_tree(parsed['value'][0]);
+
+   var debug_info = {
+      'origin_src' : code,
+      'lexeme_indices' : lexed
+   }
+   print_exp_tree(debug_info,  exp_opt, num_tabs);
 }
 
 function main() {
    //test_lex_get_block_ranges();
    //test_lex();
-   test_parse();
-   //test_ir_comp();
+   //test_parse();
+   test_scm_parser('ir.scm');
 }
 
 main();
@@ -662,7 +789,7 @@ function repeat_str(s, n) {
       ret += s;
    return ret;
 }
-function make_tabs(n) { return repeat_str('   ', n); }
+function make_tab_chars(n) { return repeat_str('   ', n); }
 
 //TODO: broken, removeme
 //http://stackoverflow.com/questions/1181575/determine-whether-an-array-contains-a-value

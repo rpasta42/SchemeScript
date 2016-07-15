@@ -103,10 +103,6 @@ write text to file
    (read-line (current-input-port)))
 */
 
-function cons(a, b) {
-   return ss_mk_var(SS_CON, [a, b]);
-}
-
 function arr_to_lst(arr) {
    var ret = ss_mk_var(SS_NIL);
 
@@ -135,6 +131,9 @@ function cons_map(exp, f) { //map
    return ss_mk_var(SS_NIL);
 }
 
+function cons(a, b) {
+   return ss_mk_var(SS_CON, [a, b]);
+}
 function car(lst) {
    if (ss_is_type(lst, SS_CON))
       return ss_get_val(lst)[0];
@@ -144,6 +143,10 @@ function cdr(lst) {
    if (ss_is_type(lst, SS_CON))
       return ss_get_val(lst)[1];
    return null;
+}
+function list() {
+   var args = Array.prototype.slice.call(args);
+   return arr_to_lst(args); //args;
 }
 
 function procedure_kkqm_(exp) { //procedure?

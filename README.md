@@ -2,6 +2,10 @@
 # SchemeScript
 λλλλλλλλλλλλλλλλλλλλλλλλ
 
+Lex/Parse TODO:
+- [ ] lexing "|#" as error, and lexer eats # character at the moment
+- [ ] automate unit tests
+
 #node test
 guile main.scm >misc/efcart/test.tmp.js
 
