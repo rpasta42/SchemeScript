@@ -602,10 +602,16 @@ function test_parse() {
    var test_parse_str6 = "(define (f x y) (+ y 5 (* x x)))";
    var test_parse_str7 = "(blah 't '(+ 3 5))";
    var test_parse_str8 = "'yo";
+   var test_parse_str9 = "((define x (+ 3 5)) (define (f x y) (- 3 10) (+ x y 4 2)))";
+   var test_parse_str10 = "#|"; //lex err
+   var test_parse_str11 = "\""; //lex err
 
-   var to_parse = test_parse_str3;
+   var to_parse = test_parse_str11;
    var lexed_opt = lex(to_parse);
-   if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+   if (ss_is_type(lexed_opt, SS_ERR)) {
+      print_exp(lexed_opt); //return lexed_opt;
+      return;
+   }
    var lexed = ss_get_val(lexed_opt);
 
    var parsed = parse(lexed);
@@ -617,11 +623,23 @@ function test_parse() {
 }
 
 //END PARSER STUFF
+function test_ir_comp() {
+   var lexed_opt = lex(to_parse);
+    if (ss_is_type(lexed_opt, SS_ERR)) return lexed_opt;
+   var lexed = ss_get_val(lexed_opt);
+   var parsed = parse(lexed);
+   //print_exp(parsed);
+   //print_exp_raw(parsed);
+   //print_exp_raw(parsed['value'][0]);
+   //print_exp(parsed['value'][0]);
+   print_exp(parsed);
+}
 
 function main() {
    //test_lex_get_block_ranges();
    //test_lex();
    test_parse();
+   //test_ir_comp();
 }
 
 main();
