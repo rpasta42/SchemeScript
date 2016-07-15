@@ -419,8 +419,10 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
    var quotes = quotes.reverse();
    if (is_atom) {
       let exp = _parse_lexeme(lexemes[start]);
-      if (exp == null)
+      if (exp == null) {
+         console.log(lexemes[start]);
          return ss_mk_err(SS_ERR_BadLexeme, 'parse', start, end);
+      }
       for (var i in quotes) { //TODO: reverse quotes???
          exp = ss_mk_var(lexer_quote_to_exp(quotes[i]), exp);
       }
@@ -542,6 +544,9 @@ function badResultPrint(debug_info, err, tab_chars) {
                err.end + '): ' + err.code);
    var x = s("%ibad parse(): (%i, %i): %s",
              tab_chars, err.start, err.end, err.code));*/
+   //console.log(s("%ibad parse(): (%i, %i): %s", tab_chars, err.start, err.end, err.code));
+   //return;
+
    var err_while_err_str = 'error while displaying error: ';
    var char_i_start = null, char_i_end = null;
 
@@ -615,6 +620,7 @@ function badResultPrint(debug_info, err, tab_chars) {
                 tab_chars, start_line, start_char_in_line, end_line, end_char_in_line);
 
    for (var i = start_line; i <= end_line; i++) {
+      if (lines[i].length == 0) continue;
       err_str += '\n' + lines[i] + '\n';
 
       for (var j in lines[i]) {
@@ -737,7 +743,7 @@ function test_scm_parser(fpath) {
    var fs = require('fs');
 
    var code = fs.readFileSync(fpath, {encoding:'utf8', flags:'r'});
-   console.log(code);
+   //console.log(code);
 
    var lexed_opt = lex(code);
     if (ss_is_type(lexed_opt, SS_ERR)) {
@@ -745,7 +751,7 @@ function test_scm_parser(fpath) {
          'origin_src' : code,
          'lexeme_indices' : null
       }
-      print_exp_tree(debug_info, lexed_opt, 1);
+      print_exp_tree(debug_info, lexed_opt, 0);
       return;
    }
    var lexed = ss_get_val(lexed_opt);
@@ -759,14 +765,14 @@ function test_scm_parser(fpath) {
       'origin_src' : code,
       'lexeme_indices' : lexed
    }
-   print_exp_tree(debug_info,  exp_opt, num_tabs);
+   print_exp_tree(debug_info, parsed, 0);
 }
 
 function main() {
    //test_lex_get_block_ranges();
    //test_lex();
    //test_parse();
-   test_scm_parser('ir.scm');
+   test_scm_parser('test_parser.scm'); //'ir.scm'
 }
 
 main();
