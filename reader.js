@@ -60,6 +60,7 @@ var SS_INT = 'ss_int';
 var SS_FLT = 'ss_flt'; //float
 var SS_SYM = 'ss_sym';
 var SS_NIL = 'ss_nil';
+var SS_CCC = 'ss_cc';
 //var SS_FUN = 'ss_fun';
 var SS_ERR = 'ss_err';
 //var SS_LST = 'ss_lst';
@@ -276,7 +277,7 @@ function lex(str) {
             i -= 1; //TODO: why do we have to do this?*/
          //else if (c == '#')
          else if (c == '"' || c == '#' || c == ';') ;
-         else if (c == ' ') ; //skip
+         else if (c == ' ' || c == '\n') ; //skip
          else {
             if (col.length == 0) {
                collect_start = i;
@@ -418,9 +419,15 @@ function _parse_lexeme(lex) {
 function _parse_helper(lexemes, start, end, quotes, is_atom) {
    var quotes = quotes.reverse();
    if (is_atom) {
-      let exp = _parse_lexeme(lexemes[start]);
+      var l = lexemes[start];
+      let exp = _parse_lexeme(l);
       if (exp == null) {
-         console.log(lexemes[start]);
+         //console.log(lexemes[start]);
+         var t = l.lexeme.value.type;
+         if (t == SS_LEX_SC || t == SS_LEX_BC) {
+            //console.log('............');
+            return ss_mk_var(SS_CCC, null);
+         }
          return ss_mk_err(SS_ERR_BadLexeme, 'parse', start, end);
       }
       for (var i in quotes) { //TODO: reverse quotes???
@@ -454,7 +461,8 @@ function _parse_helper(lexemes, start, end, quotes, is_atom) {
                                              child.quotes, child['atom?']);
          if (ss_is_type(parsed_child_ret, SS_ERR))
             return parsed_child_ret;
-         sub.push(parsed_child_ret); //kk remove tags //ss_get_val(parsed_child_ret));
+         else if (!ss_is_type(parsed_child_ret, SS_CCC))
+            sub.push(parsed_child_ret); //kk remove tags //ss_get_val(parsed_child_ret));
          //kk removeme //sub = cons(ss_get_val(parsed_child_ret), sub); //TODO: reverse?
 
          c_it += 1;
@@ -503,8 +511,8 @@ function parse(lexemes) {
       var parsed_child_ret = _parse_helper(lexemes, start, end, quotes, is_atom);
       if (ss_is_type(parsed_child_ret, SS_ERR))
          return parsed_child_ret;
-
-      ret.push(parsed_child_ret); //ss_get_val(parsed_child_ret));
+      if (!ss_is_type(parsed_child_ret, SS_CCC))
+         ret.push(parsed_child_ret); //ss_get_val(parsed_child_ret));
       //ret = cons(ss_get_val(parsed_child_ret), ret);
    }
    ret = ss_mk_var(SS_ARR, ret);
@@ -680,7 +688,7 @@ function print_exp_tree(debug_info, exp_opt, num_tabs) {
       console.log(tab_chars + 'sym: ' + exp_val);
    else if (ss_is_type(exp_opt, SS_ARR)) {
       console.log(tab_chars + 'sub: ');
-      ss_get_val(exp_val).map(function (x) {
+      ss_get_val(exp_opt).map(function (x) {
          print_exp_tree(debug_info, x, num_tabs+1);
       });
    }
@@ -754,6 +762,8 @@ function test_scm_parser(fpath) {
       print_exp_tree(debug_info, lexed_opt, 0);
       return;
    }
+   //_print_lex_result(lexed_opt); //TODO: only for lex testing
+
    var lexed = ss_get_val(lexed_opt);
    var parsed = parse(lexed);
    //print_exp_tree(parsed);
@@ -780,7 +790,7 @@ main();
 //MISC Generic Helper Utilities
 function is_int(x) {
    var str = x.toString();
-   return is_numeric(str) && str.indexOf('.') == -1;
+   return (x.length > 0) && is_numeric(str) && str.indexOf('.') == -1;
 }
 function is_float(x) {
    var str = x.toString();
