@@ -276,7 +276,8 @@ function lex(str) {
          /*else if (c == '"' || c == '#' || c == ';') //gets triggered for stuff like """"
             i -= 1; //TODO: why do we have to do this?*/
          //else if (c == '#')
-         else if (c == '"' || c == '#' || c == ';') ;
+         else if (c == '"' || c == '#' /*|| c == ';'*/) ;
+         else if (c == ';') continue;
          else if (c == ' ' || c == '\n') ; //skip
          else {
             if (col.length == 0) {
@@ -347,11 +348,9 @@ function test_lex() {
    //console.log(lex(test_lex_str1));
    _print_lex_result(lex(test_lex_str7));
 }
-
 //END LEXER STUFF
 
 //PARSER STUFF
-
 //parser itself (no testing code)
 function lexer_quote_to_exp(q) {
    if (q == SS_LEX_Q) return SS_Q;
@@ -575,6 +574,7 @@ function badResultPrint(debug_info, err, tab_chars) {
       }
       var lexemes = debug_info.lexeme_indices;
       var lex_start = lexemes[err.start];
+      console.log('first lexeme: ' + JSON.stringify(lex_start));
       var lex_end = lexemes[err.end];
       char_i_start = lex_start.start;
       char_i_end = lex_end.end;
@@ -744,8 +744,6 @@ function test_parse() {
    print_exp_tree(parsed);
 }
 
-//END PARSER STUFF
-
 function test_scm_parser(fpath) {
    console.log('parsing ' + fpath);
    var fs = require('fs');
@@ -778,11 +776,13 @@ function test_scm_parser(fpath) {
    print_exp_tree(debug_info, parsed, 0);
 }
 
+//END PARSER STUFF
+
 function main() {
    //test_lex_get_block_ranges();
    //test_lex();
    //test_parse();
-   test_scm_parser('test_parser.scm'); //'ir.scm'
+   test_scm_parser('ir.scm'); //'ir.scm'
 }
 
 main();
