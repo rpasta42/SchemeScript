@@ -29,7 +29,9 @@ fi
 extra=""
 
 #jsengine=phantomjs
-jsengine="nodejs -i"
+#jsengine="nodejs -i"
+jsengine="node -i"
+
 if [[ $@ == *ui* ]]
 then
    jsengine=./ui/run.py

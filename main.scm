@@ -1,8 +1,8 @@
 (load "jsgen.scm")
 ;(display (ir->js (runner exp-lisp) 0))
 
-;(define newl "")
-;(repl-iter)
+(define newl "")
+(repl-iter)
 
 (define newl "\n")
 ;server code
@@ -10,12 +10,11 @@
 ;client
 ;(comp-file "misc/efcart/efcart.ss")
 
-(display newl)
-;(comp-file "misc.test/cc")
-;(comp-file "ir.scm")
-;(comp-file "scm_lib.scm")
+;TODO uncomment when using comp-file
+;(display newl)
+;(comp-file "misc.test/cc") ;"ir.scm", "scm_lib.scm"
 ;(comp-file "/home/kkostya/fun/rust/skomakare/examples/racing.lo")
-(comp-file "ir.scm")
+;(comp-file "ir.scm")
 ;(define newl "\n")
 ;(repl-js)
 

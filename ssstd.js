@@ -154,6 +154,13 @@ function scm_obj_dict() {
 
 function scm_string_append() {}
 
+var selfcomp = require('./selfcomp.js');
+var reader = require('./reader.js');
+exports.cons_ = selfcomp.cons;
+exports.car_ = selfcomp.car;
+exports.cdr_ = selfcomp.cdr;
+exports.list_ = selfcomp.list;
+
 if (typeof module == 'undefined' || !module.exports)
    exports = scm = {};
 
@@ -179,4 +186,5 @@ exports.eq = scm_eq;
 exports.obj_dict = scm_obj_dict;
 exports.arr_i = scm_arr_i;
 exports.arr_push = scm_arr_push;
+
 

@@ -103,7 +103,8 @@ write text to file
    (read-line (current-input-port)))
 */
 
-function arr_to_lst(arr) {
+function arr_to_lst(arr_) {
+   var arr = arr_.reverse();
    var ret = ss_mk_var(SS_NIL);
 
    for (var i in arr) {
@@ -145,7 +146,7 @@ function cdr(lst) {
    return null;
 }
 function list() {
-   var args = Array.prototype.slice.call(args);
+   var args = Array.prototype.slice.call(arguments);
    return arr_to_lst(args); //args;
 }
 
@@ -184,6 +185,7 @@ function to_string(exp) {}
 exports.cons = cons;
 exports.car = car;
 exports.cdr = cdr;
+exports.list = list;
 exports.cons_map = cons_map;
 exports.arr_to_lst = arr_to_lst;
 exports.lst_to_arr = lst_to_arr;
