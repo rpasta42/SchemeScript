@@ -782,7 +782,7 @@ function main() {
    //test_lex_get_block_ranges();
    //test_lex();
    //test_parse();
-   test_scm_parser('ir.scm'); //'ir.scm'
+   test_scm_parser('irtest.scm'); //'ir.scm'
 }
 
 main();

@@ -1,5 +1,5 @@
 
-(load "helpers.scm")
+(load "helpers.scm)
 
 ;for generic helpers
 

@@ -20,7 +20,5 @@
 
 
 ;(define newl "\n")
-;(comp-jshtml "misc/test.ss")
-;(comp-jshtml "misc/efcart.ss")
+;"misc/examples_kittens_btns_moving.ss", "misc/efcart.ss", "misc/test.ss"
 ;(comp-jshtml "misc/tetlisp.ss")
-;(comp-jshtml "misc/example_kittens_btns_moving.ss")

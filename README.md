@@ -1,111 +1,31 @@
 ## WARNING: THIS PROJECT IS IN VERY EARLY STAGE OF DEVELOPMENT
 # SchemeScript
-λλλλλλλλλλλλλλλλλλλλλλλλ
+## λλλλλλλλλλλλλλλλλλλλλλλλ
 
-Lex/Parse TODO:
-- [ ] lexing "|#" as error, and lexer eats # character at the moment
-- [ ] automate unit tests
+Experimental Scheme REPL and Scheme->Javascript transcompiler written in Scheme. Currently the transcompiler code runs on guile, but I'm in the process of making SchemeScript to be able to transcompile it's own source code to JavaScript.
 
-#node test
-guile main.scm >misc/efcart/test.tmp.js
-
-
-left off on special (tag/style/attr. added to ir.scm, now add to jsgen.scm
-
-guile main.scm >/root/nginx-html/test1.html
-cp ssstd.js ~/nginx-html/
-chmod u+r ~/nginx-html/ssstd.js
-
-guile html.scm >/tmp/site.html; google-chrome /tmp/site.html
-guile html.scm >/tmp/test.html; firefox /tmp/test.html
-http://www.biwascheme.org/doc/reference.html
-(define-macro (test expr) `(if ,expr #t (print (format "test failed: ~a" (quote ,expr)))))
-(test (= 1 2))
-
-guile main.scm; guile main.scm  >ss_ir_test.js; nodejs ss_ir_test.js
-guile main.scm >/tmp/racing.js; nodejs /tmp/racing.js
-
-Experimental Scheme->Javascript REPL and cross compiler written in Scheme.
-
- from subset of Scheme to Javascript.
-
-Scheme -> Javascript generation code (located in ir.scm) is extremely messy and incomplete. So far it's only 300 lines and only supports tiny subset of Scheme.
-
-Currently ir.scm runs in Guile, but I plan to test it out on racket and my experimental [Scheme interpreter written in rust](https://github.com/kostyakow/lambdaoxide).
+Scheme -> Javascript generation code (located in ir.scm) is messy and incomplete. So far it only supports tiny subset of Scheme.
 
 Code generation works by recursively compiling lisp to intermediate S-Expression format with type annotations, and then generating the Javascript from the IR.
 
 Scheme REPL works by piping output of ir.scm to a V8 Javascript repl. I'm in the process of deciding which v8 engine to use, and I have been testing the Scheme repl with node and PhantomJS.
 
-I'm also planning on implementing SchemeScript library for creating UI's and manipulating DOM.
+I'm also planning on implementing SchemeScript library for creating UI's and manipulating DOM on a higher level.
+I have a tiny macro system which generates HTML and css from S-expressions, and example tetris-like game (which is still very buggy).
 
-ui/repl.sh is a basic SchemeScript repl which can call JQuery to modify DOM of a WebKit window (some examples can be found in misc/COOL.notes).
+0.0.2 goals:
 
-UI REPL works by piping output of ir.scm to a [Python script](https://github.com/KostyaKow/pwkg) which sets up WebkitGTK window and executes Javascript received from stdin.
+- [ ] clean up ir.scm, jsgen.scm
+- [ ] implement parser/read
+- [ ] implement fake command line shell in HTML/CSS for user input
+- [ ] declare variables as var, don't pollute global namespace
+   - [ ] return only last expression from function or begin
+- [ ] consistent interface, and standard Scheme functions
+   - [ ] figure out selfcomp.js/reader.js/ssstd.js mess, and make one unified interface
+- [ ] clean up HTML code
+- [ ] improve server side code, deployement scripts
 
-Features:
-- [x] Strings & Numbers
-- [x] Basic functions (define (f x y) (+ x y 10))
-- [x] Creating variables (define x 10)
-- [x] Addition and subtraction
 
-High priority TODO's:
-- [ ] main.scm should accept different argument types
-- [ ] better REPL for UI
-- [ ] if and cond statements
-- [ ] efficient recursion or iteration mechanism
-- [ ] ways to create and access javascript objects (maybe use . or # or $ etc)
-   - [ ] possibly rework \ to be first argument of functions. if it is, then assume we aren't calling normal function and do everything properly
-   - [ ] js arrays
-   - [ ] setting dictionary members
-      - [ ] check gen-js-call and add stuff that's missing to argmapper
-      - [ ] check scm_obj_dict and add support for setting members
-- [ ] create example games
-   - [ ] Write a graphical Risk game
-- [ ] break up ir.scm into different parts
-- [ ] tool for compiling files instead of just having REPL
-- [ ] make if support full range of Scheme expressions
 
-Other unsupported things and TODO's:
-- [ ] error checking on ssstd.js
-- [ ] possibly rename to ssstd.js to stdss.js
-- [ ] expose read to SchemeScript (i.e. re-write Sexps parser in JavaScript)
-- [ ] expose eval to SchemeScript (i.e. re-write SchemeScript in SchemeScript)
-- [ ] Test out on LambdaOxide
-- [ ] cond statements
-- [ ] Division and multiplication
-- [ ] Efficient Javascript generation
-- [ ] cons, list, car, cdr
 
-Flatris:
-
-cos(90) = 0
-sin(90) = 1
-x' = x*cosT + y*sinT
-y' = -x*sinT + y*cosT
-x' = y
-y' = -x
-
-TODO:
-   on of squares in shape-stable < 0, alert("you lost")
-
-width: 10
-height: 20
-
-xx
- xx
-
-xx
-xx
-
-xxxx
-
- x
-xxx
-
-x
-xxx
-
-  x
-xxx
 
